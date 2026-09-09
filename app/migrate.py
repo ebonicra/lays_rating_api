@@ -1,4 +1,4 @@
-# make_admin.py или новый migrate.py
+# migrate.py
 from app.database import SessionLocal
 from sqlalchemy import text
 
@@ -6,10 +6,17 @@ db = SessionLocal()
 
 with db.bind.connect() as conn:
     try:
-        conn.execute(text("ALTER TABLE users ADD COLUMN avatar_path VARCHAR(255)"))
+        conn.execute(text("ALTER TABLE user_category ADD COLUMN russia_only BOOLEAN DEFAULT 0"))
         conn.commit()
-        print("✅ Колонка avatar_path добавлена")
+        print("✅ Колонка russia_only добавлена")
     except Exception as e:
-        print(f"ℹ️ {e}")
+        print(f"ℹ️ russia_only: {e}")
+
+    try:
+        conn.execute(text("ALTER TABLE user_category ADD COLUMN available_only BOOLEAN DEFAULT 0"))
+        conn.commit()
+        print("✅ Колонка available_only добавлена")
+    except Exception as e:
+        print(f"ℹ️ available_only: {e}")
 
 db.close()

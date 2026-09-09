@@ -1,6 +1,10 @@
+from pathlib import Path
+
 from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+import os
 
 from app.database import get_db
 from app.models.chip import Chip
@@ -15,6 +19,11 @@ router = APIRouter(
     prefix="/chips",
     tags=["chips"]
 )
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+CHIPS_DIR = BASE_DIR / "backend" / "uploads" / "chips"
+os.makedirs(CHIPS_DIR, exist_ok=True)
+
 
 
 @router.get("/", response_model=list[ChipResponse])
@@ -69,7 +78,6 @@ def get_chips(
             "image_path": chip.image_path,
             "collection": chip.collection,
             "release_year": chip.release_year,
-            "discontinued_year": chip.discontinued_year,
             "country": chip.country,
             "available": chip.available,
             "rating": {
@@ -129,7 +137,6 @@ def get_chip(
         "image_path": chip.image_path,
         "collection": chip.collection,
         "release_year": chip.release_year,
-        "discontinued_year": chip.discontinued_year,
         "country": chip.country,
         "available": chip.available,
         "rating": {
@@ -139,3 +146,16 @@ def get_chip(
         },
         "comment_count": comment_count,
     }
+
+
+@router.get("/images/{filename}")
+def get_chip_image(filename: str):
+    filepath = CHIPS_DIR / filename
+    
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail="Файл не найден")
+    
+    return FileResponse(
+        str(filepath),
+        headers={"Cache-Control": "public, max-age=86400"},  # ← кэш на сутки
+    )

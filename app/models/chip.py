@@ -50,10 +50,6 @@ class Chip(Base):
         nullable=True
     )
 
-    discontinued_year: Mapped[int | None] = mapped_column(
-        nullable=True
-    )
-
     country: Mapped[str | None] = mapped_column(
         String(100),
         nullable=True
@@ -87,15 +83,3 @@ class Chip(Base):
 
     def __repr__(self) -> str:
         return f"<Chip id={self.id} name={self.name} category={self.category}>"
-
-    @property
-    def is_discontinued(self) -> bool:
-        """Проверяет, снят ли чипс с производства"""
-        return self.discontinued_year is not None
-
-    @property
-    def years_active(self) -> int | None:
-        """Возвращает количество лет, которое чипс был в производстве"""
-        if self.release_year and self.discontinued_year:
-            return self.discontinued_year - self.release_year
-        return None

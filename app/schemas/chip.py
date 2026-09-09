@@ -16,7 +16,6 @@ class ChipResponse(BaseModel):
 
     collection: str | None
     release_year: int | None
-    discontinued_year: int | None
     country: str | None
     available: bool
     rating: RatingResponse
@@ -33,7 +32,6 @@ class ChipCreate(BaseModel):
     image_path: str
     collection: str | None = None
     release_year: int | None = None
-    discontinued_year: int | None = None
     country: str | None = None
     available: bool = True
 
@@ -45,7 +43,6 @@ class ChipUpdate(BaseModel):
     image_path: str | None = None
     collection: str | None = None
     release_year: int | None = None
-    discontinued_year: int | None = None
     country: str | None = None
     available: bool | None = None
     
@@ -61,9 +58,22 @@ class ChipAdminResponse(BaseModel):
     image_path: str
     collection: str
     release_year: int
-    discontinued_year: int | None = None
     country: str
     available: bool
+    
+    class Config:
+        from_attributes = True
+
+
+class ChipCreate(BaseModel):
+    name: str
+    category: str
+    description: str
+    image_path: str | None = None
+    collection: str
+    country: str
+    release_year: int
+    available: bool = True
     
     class Config:
         from_attributes = True

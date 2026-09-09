@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import String, ForeignKey, UniqueConstraint, Index
+from sqlalchemy import String, Boolean, ForeignKey, UniqueConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -24,17 +24,28 @@ class UserCategory(Base):
     )
 
     category: Mapped[str] = mapped_column(
-        String(50),  # Ограничим длину категории
+        String(50),
         nullable=False
     )
 
-    # Отношение к пользователю
+    # НОВЫЕ ПОЛЯ:
+    russia_only: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False
+    )
+
+    available_only: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False
+    )
+
     user: Mapped["User"] = relationship(
         back_populates="user_categories",
         lazy="selectin"
     )
 
-    # Уникальность: один пользователь не может выбрать одну категорию дважды
     __table_args__ = (
         UniqueConstraint("user_id", "category", name="uq_user_category"),
         Index("ix_user_category_user_id_category", "user_id", "category"),

@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 from fastapi.responses import FileResponse
 
@@ -10,12 +9,7 @@ from app.database import get_db
 
 from app.models.user import User
 from app.models.user_category import UserCategory
-from app.models.chip_preference import ChipPreference
-from app.models.chip_comment import ChipComment
-from app.models.follow import Follow
-from app.schemas.user import UserCreate, UserResponse, TokenResponse, LoginRequest
-from app.schemas.follow import UserBriefResponse
-from app.schemas.user import UserUpdate
+from app.schemas.user import UserCreate, UserResponse, TokenResponse, LoginRequest, UserUpdate
 
 from app.core.security import hash_password, verify_password, create_access_token
 from app.core.dependencies import get_current_user
@@ -31,20 +25,11 @@ router = APIRouter(
 )
 
 
-def _get_user_brief(user: User) -> UserBriefResponse:
-    """Преобразовать User в краткую информацию"""
-    return UserBriefResponse(
-        id=user.id,
-        username=user.username,
-        display_name=user.display_name,
-        avatar_url=f"/users/avatars/{user.avatar_path}" if user.avatar_path else None,
-    )
-
-
 # ===== АУТЕНТИФИКАЦИЯ =====
 
 @router.post("/register", response_model=UserResponse)
 def register(data: UserCreate, db: Session = Depends(get_db)):
+    """Регистрация нового пользователя"""
     existing_user = db.query(User).filter(User.username == data.username).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already exists")
@@ -58,6 +43,7 @@ def register(data: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
+    # Добавляем дефолтные категории
     for category in DEFAULT_CATEGORIES:
         preference = UserCategory(
             user_id=user.id,
@@ -70,6 +56,7 @@ def register(data: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=TokenResponse)
 def login(data: LoginRequest, db: Session = Depends(get_db)):
+    """Вход в систему"""
     user = db.query(User).filter(User.username == data.username).first()
     
     if user is None or not verify_password(data.password, user.password_hash):
@@ -79,20 +66,21 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
     return {"access_token": token, "token_type": "bearer"}
 
 
-# ===== ТЕКУЩИЙ ПОЛЬЗОВАТЕЛЬ =====
+# ===== ПРОФИЛЬ =====
 
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user: User = Depends(get_current_user)):
+    """Получить свой профиль"""
     return current_user
 
 
-#Обновить имя и username
 @router.put("/me")
 def update_profile(
     data: UserUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Обновить имя и username"""
     
     if data.display_name is not None:
         current_user.display_name = data.display_name
@@ -119,58 +107,12 @@ def update_profile(
         "created_at": current_user.created_at,
     }
 
-@router.get("/me/stats")
-def get_user_stats(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):    
-    ratings_count = db.query(func.count(ChipPreference.id)).filter(
-        ChipPreference.user_id == current_user.id,
-        ChipPreference.rating.isnot(None),
-    ).scalar() or 0
-    
-    favorites_count = db.query(func.count(ChipPreference.id)).filter(
-        ChipPreference.user_id == current_user.id,
-        ChipPreference.is_favorite == True,
-    ).scalar() or 0
-    
-    tried_count = db.query(func.count(ChipPreference.id)).filter(
-        ChipPreference.user_id == current_user.id,
-        ChipPreference.is_tried == True,
-    ).scalar() or 0
-    
-    comments_count = db.query(func.count(ChipComment.id)).filter(
-        ChipComment.user_id == current_user.id
-    ).scalar() or 0
-    
-    avg_rating = db.query(func.avg(ChipPreference.rating)).filter(
-        ChipPreference.user_id == current_user.id,
-        ChipPreference.rating.isnot(None),
-    ).scalar()
-
-    followers_count = db.query(func.count(Follow.id)).filter(
-        Follow.following_id == current_user.id
-    ).scalar() or 0
-    
-    following_count = db.query(func.count(Follow.id)).filter(
-        Follow.follower_id == current_user.id
-    ).scalar() or 0
-    
-    return {
-        "ratings_count": ratings_count,
-        "favorites_count": favorites_count,
-        "tried_count": tried_count,
-        "comments_count": comments_count,
-        "average_rating": round(float(avg_rating), 1) if avg_rating else 0.0,
-        "followers_count": followers_count,
-        "following_count": following_count,
-    }
-
 
 # ===== АВАТАРКИ =====
 
 @router.get("/avatars/{filename}")
 def get_avatar(filename: str):
+    """Получить аватарку по имени файла"""
     filepath = os.path.join(AVATARS_DIR, filename)
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="Файл не найден")
@@ -184,6 +126,7 @@ async def upload_avatar(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Загрузить аватарку"""
     print(f"Получен файл: {file.filename}, тип: {file.content_type}")
     
     ext = file.filename.split(".")[-1].lower() if "." in file.filename else ""
@@ -199,6 +142,7 @@ async def upload_avatar(
     if len(contents) > 5 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="Файл слишком большой (макс 5 МБ)")
     
+    # Удаляем старую аватарку
     if current_user.avatar_path:
         old_path = os.path.join(AVATARS_DIR, current_user.avatar_path)
         if os.path.exists(old_path):
@@ -221,6 +165,7 @@ def delete_avatar(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Удалить аватарку"""
     if current_user.avatar_path:
         filepath = os.path.join(AVATARS_DIR, current_user.avatar_path)
         if os.path.exists(filepath):
@@ -231,40 +176,6 @@ def delete_avatar(
     return {"message": "Аватарка удалена"}
 
 
-# ===== ПОИСК И СПИСКИ (ДО /{user_id}!) =====
-
-@router.get("/search")
-def search_users(
-    q: str,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    users = (
-        db.query(User)
-        .filter(
-            User.username.ilike(f"%{q}%"),
-            User.id != current_user.id,
-        )
-        .limit(20)
-        .all()
-    )
-    return [_get_user_brief(u) for u in users]
-
-
-@router.get("/list")
-def get_all_users(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    users = (
-        db.query(User)
-        .filter(User.id != current_user.id)
-        .order_by(User.username)
-        .all()
-    )
-    return [_get_user_brief(u) for u in users]
-
-
 # ===== ПУБЛИЧНЫЙ ПРОФИЛЬ (ПОСЛЕДНИЙ!) =====
 
 @router.get("/{user_id}")
@@ -273,6 +184,7 @@ def get_user(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Получить публичный профиль пользователя"""
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -283,58 +195,5 @@ def get_user(
         "display_name": user.display_name,
         "is_admin": user.is_admin,
         "avatar_url": f"/users/avatars/{user.avatar_path}" if user.avatar_path else None,
-    }
-
-#Публичная статистика пользователя"""
-@router.get("/{user_id}/stats")
-def get_public_user_stats(
-    user_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    
-    user = db.query(User).filter(User.id == user_id).first()
-    if user is None:
-        raise HTTPException(status_code=404, detail="Пользователь не найден")
-    
-    ratings_count = db.query(func.count(ChipPreference.id)).filter(
-        ChipPreference.user_id == user_id,
-        ChipPreference.rating.isnot(None),
-    ).scalar() or 0
-    
-    favorites_count = db.query(func.count(ChipPreference.id)).filter(
-        ChipPreference.user_id == user_id,
-        ChipPreference.is_favorite == True,
-    ).scalar() or 0
-    
-    tried_count = db.query(func.count(ChipPreference.id)).filter(
-        ChipPreference.user_id == user_id,
-        ChipPreference.is_tried == True,
-    ).scalar() or 0
-    
-    comments_count = db.query(func.count(ChipComment.id)).filter(
-        ChipComment.user_id == user_id
-    ).scalar() or 0
-    
-    avg_rating = db.query(func.avg(ChipPreference.rating)).filter(
-        ChipPreference.user_id == user_id,
-        ChipPreference.rating.isnot(None),
-    ).scalar()
-    
-    followers_count = db.query(func.count(Follow.id)).filter(
-        Follow.following_id == user_id
-    ).scalar() or 0
-    
-    following_count = db.query(func.count(Follow.id)).filter(
-        Follow.follower_id == user_id
-    ).scalar() or 0
-    
-    return {
-        "ratings_count": ratings_count,
-        "favorites_count": favorites_count,
-        "tried_count": tried_count,
-        "comments_count": comments_count,
-        "average_rating": round(float(avg_rating), 1) if avg_rating else 0.0,
-        "followers_count": followers_count,
-        "following_count": following_count,
+        "created_at": user.created_at,
     }

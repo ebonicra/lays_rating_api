@@ -6,6 +6,8 @@ from app.database import get_db
 from app.models.chip_comment import ChipComment
 from app.models.comment_reaction import CommentReaction
 from app.models.chip_preference import ChipPreference
+from app.models.news import News
+
 from app.models.chip import Chip
 from app.models.user import User
 from app.schemas.chip_comment import (
@@ -143,7 +145,17 @@ def create_comment(
     db.add(comment)
     db.commit()
     db.refresh(comment)
-    
+
+    news = News(
+        event_type="friend_comment",
+        user_id=current_user.id,
+        chip_id=chip_id,
+        comment_id=comment.id,  # ← добавили
+        text=comment.text,
+    )
+    db.add(news)
+    db.commit()
+
     return _comment_to_response(db, comment, current_user.id)
 
 
@@ -175,6 +187,15 @@ def update_comment(
     comment.text = data.text
     db.commit()
     db.refresh(comment)
+
+    news = (
+        db.query(News)
+        .filter(News.comment_id == comment.id)
+        .first()
+    )
+    if news:
+        news.text = comment.text
+        db.commit()
     
     return _comment_to_response(db, comment, current_user.id)
 
@@ -205,6 +226,15 @@ def delete_comment(
     
     db.delete(comment)
     db.commit()
+
+    news = (
+        db.query(News)
+        .filter(News.comment_id == comment.id)
+        .first()
+    )
+    if news:
+        db.delete(news)
+        db.commit()
     
     return {"message": "Comment deleted"}
 
