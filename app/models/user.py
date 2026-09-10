@@ -13,6 +13,8 @@ if TYPE_CHECKING:
     from app.models.user_category import UserCategory
     from app.models.chip_comment import ChipComment
     from app.models.comment_reaction import CommentReaction
+    from app.models.user_photo import UserPhoto  # ← добавили
+    from app.models.photo_reaction import PhotoReaction  # ← добавили
 
 
 class User(Base):
@@ -96,6 +98,21 @@ class User(Base):
         back_populates="following",
         cascade="all, delete-orphan",
     )
+
+
+    photos: Mapped[list["UserPhoto"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+    # Реакции на фото
+    photo_reactions: Mapped[list["PhotoReaction"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
 
     def __repr__(self) -> str:
         return f"<User id={self.id} username={self.username}>"

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from app.database import engine, Base
-from app.models import chip, chip_comment, user, chip_preference, user_category, comment_reaction, follow
-from app.routers import chip, chip_comment, user, user_lists, user_stats, admin, chip_preferences, user_category, follow, news
+from app.models import chip, chip_comment, user, chip_preference, user_category, comment_reaction, follow, user_photo, photo_reaction
+from app.routers import chip, chip_comment, user, user_lists, user_stats, admin, chip_preferences, user_category, follow, news, photo
 
 
 app = FastAPI()
@@ -23,6 +23,7 @@ app.include_router(user_category.router)
 app.include_router(chip_preferences.router)
 app.include_router(chip_comment.router)
 app.include_router(follow.router)
+app.include_router(photo.router)
 
 
 
