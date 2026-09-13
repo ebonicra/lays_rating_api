@@ -89,3 +89,32 @@ def update_preference(
     db.commit()
     db.refresh(preference)
     return preference
+
+@router.delete("/{chip_id}/preference/rating")
+def delete_rating(
+    chip_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    preference = (
+        db.query(ChipPreference)
+        .filter(
+            ChipPreference.user_id == current_user.id,
+            ChipPreference.chip_id == chip_id,
+        )
+        .first()
+    )
+
+    if preference is None:
+        raise HTTPException(status_code=404, detail="Оценка не найдена")
+
+    preference.rating = None
+    db.commit()
+    db.refresh(preference)
+
+    # Возвращаем словарь, а не модель — избегаем рекурсии
+    return {
+        "rating": preference.rating,
+        "is_favorite": preference.is_favorite,
+        "is_tried": preference.is_tried,
+    }

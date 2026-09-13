@@ -139,8 +139,6 @@ def create_news(
     db: Session = Depends(get_db),
     current_admin: User = Depends(get_current_admin),
 ):
-    """Создать новость"""
-    
     extra_data = None
     if data.extra_data:
         extra_data = json.dumps(data.extra_data)
@@ -149,7 +147,7 @@ def create_news(
         event_type=data.event_type,
         user_id=current_admin.id,
         text=data.text,
-        extra_data=extra_data,
+        extra_data=extra_data,  # ← сохраняем
     )
     db.add(news)
     db.commit()
