@@ -1,7 +1,6 @@
-from datetime import date
 from typing import TYPE_CHECKING
 
-from sqlalchemy import String, Date, Index, UniqueConstraint
+from sqlalchemy import Boolean, Index, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -9,72 +8,80 @@ from app.database import Base
 if TYPE_CHECKING:
     from app.models.chip_preference import ChipPreference
     from app.models.chip_comment import ChipComment
+    from app.models.news import News
 
 
 class Chip(Base):
     __tablename__ = "chips"
 
     id: Mapped[int] = mapped_column(
-        primary_key=True,
-        index=True
+        primary_key=True
     )
 
     name: Mapped[str] = mapped_column(
-        String(200),  # Ограничим длину названия
+        String(200),
         nullable=False,
-        index=True  # Для быстрого поиска по названию
     )
 
     category: Mapped[str] = mapped_column(
-        String(50),  # Ограничим длину категории
+        String(50),
         nullable=False,
-        index=True  # Для фильтрации по категории
     )
 
     description: Mapped[str] = mapped_column(
-        String(1000),  # Длинное описание
-        nullable=False
+        String(1000),
+        nullable=False,
     )
 
     image_path: Mapped[str] = mapped_column(
-        String(500),  # Путь к изображению
-        nullable=False
+        String(255),
+        nullable=True,
     )
 
     collection: Mapped[str | None] = mapped_column(
         String(100),
-        nullable=True
+        nullable=True,
+        index=True,
     )
 
     release_year: Mapped[int | None] = mapped_column(
-        nullable=True
+        Integer,
+        nullable=True,
     )
 
     country: Mapped[str | None] = mapped_column(
         String(100),
-        nullable=True
+        nullable=True,
+        index=True,
     )
 
     available: Mapped[bool] = mapped_column(
+        Boolean,
         default=True,
         nullable=False,
-        index=True  # Для фильтрации по доступности
+        index=True,
     )
 
-    # Отношения пользователя к чипсам
+    # ===== СВЯЗИ =====
+
+    news: Mapped[list["News"]] = relationship(
+        back_populates="chip",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
     preferences: Mapped[list["ChipPreference"]] = relationship(
         back_populates="chip",
         cascade="all, delete-orphan",
-        lazy="selectin"
+        lazy="selectin",
     )
 
     comments: Mapped[list["ChipComment"]] = relationship(
         back_populates="chip",
         cascade="all, delete-orphan",
-        lazy="selectin"
+        lazy="selectin",
     )
 
-    # Уникальность: не может быть двух чипсов с одинаковым названием
     __table_args__ = (
         UniqueConstraint("name", name="uq_chip_name"),
         Index("ix_chips_category_available", "category", "available"),

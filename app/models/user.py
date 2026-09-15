@@ -1,20 +1,21 @@
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, String, DateTime
+from sqlalchemy import String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+from app.models.user_role import UserRole
 
-# Для избежания циклических импортов
 if TYPE_CHECKING:
-    from app.models.follow import Follow
+    from app.models.user_follow import UserFollow
     from app.models.chip_preference import ChipPreference
-    from app.models.user_category import UserCategory
+    from app.models.user_filter import UserFilter
     from app.models.chip_comment import ChipComment
     from app.models.comment_reaction import CommentReaction
-    from app.models.user_photo import UserPhoto  # ← добавили
-    from app.models.photo_reaction import PhotoReaction  # ← добавили
+    from app.models.user_photo import UserPhoto
+    from app.models.photo_reaction import PhotoReaction
+    from app.models.news import News
     from app.models.poll_vote import PollVote
 
 
@@ -22,84 +23,91 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(
-        primary_key=True,
+        primary_key=True, 
         index=True
     )
 
     username: Mapped[str] = mapped_column(
-        String(50),  # Ограничим длину
+        String(20),
         unique=True,
         index=True,
-        nullable=False
+        nullable=False,
     )
 
     password_hash: Mapped[str] = mapped_column(
-        String(255),  # Для хеша пароля
-        nullable=False
+        String(255),
+        nullable=False,
     )
 
     display_name: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False
+        String(20),
+        nullable=False,
+    )
+
+    role: Mapped[str] = mapped_column(
+        String(20),
+        default=UserRole.USER.value,
+        nullable=False,
     )
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),  # Используем timezone-aware
+        DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
-        nullable=False
-    )
-
-    is_admin: Mapped[bool] = mapped_column(
-        Boolean,
-        default=False,
-        nullable=False
+        nullable=False,
     )
 
     avatar_path: Mapped[str | None] = mapped_column(
         String(255),
         nullable=True,
-        default=None
     )
 
-    # Отношения с правильными названиями и типами
+    # ===== СВЯЗИ =====
+
+    news: Mapped[list["News"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
     chip_preferences: Mapped[list["ChipPreference"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
-        lazy="selectin"  # Оптимизация запросов
+        lazy="selectin",
     )
 
-    user_categories: Mapped[list["UserCategory"]] = relationship(
+    user_filters: Mapped[list["UserFilter"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
-        lazy="selectin"
+        lazy="selectin",
     )
 
     comments: Mapped[list["ChipComment"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
-        lazy="selectin"
+        lazy="selectin",
     )
 
     comment_reactions: Mapped[list["CommentReaction"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
-        lazy="selectin"
+        lazy="selectin",
     )
 
-    # Подписки (на кого я подписан)
-    following: Mapped[list["Follow"]] = relationship(
-        foreign_keys="Follow.follower_id",
+    # Подписки: на кого я подписан
+    following: Mapped[list["UserFollow"]] = relationship(
+        foreign_keys="UserFollow.follower_id",
         back_populates="follower",
         cascade="all, delete-orphan",
+        lazy="selectin",
     )
 
-    # Подписчики (кто подписан на меня)
-    followers: Mapped[list["Follow"]] = relationship(
-        foreign_keys="Follow.following_id",
+    # Подписчики: кто подписан на меня
+    followers: Mapped[list["UserFollow"]] = relationship(
+        foreign_keys="UserFollow.following_id",
         back_populates="following",
         cascade="all, delete-orphan",
+        lazy="selectin",
     )
-
 
     photos: Mapped[list["UserPhoto"]] = relationship(
         back_populates="user",
@@ -107,7 +115,6 @@ class User(Base):
         lazy="selectin",
     )
 
-    # Реакции на фото
     photo_reactions: Mapped[list["PhotoReaction"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
@@ -117,14 +124,27 @@ class User(Base):
     poll_votes: Mapped[list["PollVote"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
+        lazy="selectin",
     )
 
-    def __repr__(self) -> str:
-        return f"<User id={self.id} username={self.username}>"
+    # ===== PROPERTIES =====
+
+    @property
+    def is_admin(self) -> bool:
+        """Админ или супер-админ"""
+        return self.role in (UserRole.ADMIN.value, UserRole.SUPER_ADMIN.value)
+
+    @property
+    def is_super_admin(self) -> bool:
+        """Только супер-админ"""
+        return self.role == UserRole.SUPER_ADMIN.value
 
     @property
     def avatar_url(self) -> str | None:
-        """Полный URL аватарки"""
+        """Относительный URL аватарки"""
         if self.avatar_path:
             return f"/users/avatars/{self.avatar_path}"
         return None
+
+    def __repr__(self) -> str:
+        return f"<User id={self.id} username={self.username} role={self.role}>"

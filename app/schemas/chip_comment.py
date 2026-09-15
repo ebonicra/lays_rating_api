@@ -1,66 +1,44 @@
-from pydantic import BaseModel, Field
 from datetime import datetime
 
+from pydantic import BaseModel, Field
+
+from app.schemas.user import UserBriefResponse
 
 
 class CommentReactionResponse(BaseModel):
-    is_liked: bool | None = None  # None — нет реакции, True — лайк, False — дизлайк
-    
-    class Config:
-        from_attributes = True
-
-
-class CommentAuthorResponse(BaseModel):
-    id: int
-    username: str
-    avatar_url: str | None = None
-    
-    class Config:
-        from_attributes = True
-
+    """ Реакция текущего пользователя на комментарий """
+    is_liked: bool | None = None
 
 class ChipCommentResponse(BaseModel):
-    """Комментарий для отображения"""
+    """ Комментарий для отображения """
     id: int
-    user: CommentAuthorResponse
+    user: UserBriefResponse
     text: str
-    rating: int | None  # Оценка, которую автор поставил чипсам
-    likes_count: int
-    dislikes_count: int
+    rating: int | None = None
+    likes_count: int = 0
+    dislikes_count: int = 0
     user_reaction: CommentReactionResponse | None = None
     created_at: datetime
     updated_at: datetime
-    
     class Config:
         from_attributes = True
 
-
 class ChipCommentListResponse(BaseModel):
+    """ Список комментариев с общим количеством (для пагинации) """
     comments: list[ChipCommentResponse]
     total_count: int
 
-
-
-
-
-# ----- Запросы -----
-
 class ChipCommentCreate(BaseModel):
+    """ Создание комментария """
+    chip_id: int
     text: str = Field(min_length=1, max_length=1000)
-    
-    class Config:
-        from_attributes = True
 
 
 class ChipCommentUpdate(BaseModel):
+    """ Редактирование своего комментария """
     text: str = Field(min_length=1, max_length=1000)
-    
-    class Config:
-        from_attributes = True
 
 
 class CommentReactionUpdate(BaseModel):
+    """ Поставить/изменить реакцию на комментарий """
     is_like: bool
-    
-    class Config:
-        from_attributes = True

@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, DateTime, Integer
+from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -14,25 +14,44 @@ if TYPE_CHECKING:
 class UserPhoto(Base):
     __tablename__ = "user_photos"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True
+    )
+
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
-    image_path: Mapped[str] = mapped_column(nullable=False)
-    likes_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+    image_path: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+    )
+
+    likes_count: Mapped[int] = mapped_column(
+        Integer,
+        default=0,
+        nullable=False,
+    )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
 
-    # Связи
-    user: Mapped["User"] = relationship(back_populates="photos")
+    # ===== СВЯЗИ =====
+
+    user: Mapped["User"] = relationship(
+        back_populates="photos",
+        lazy="selectin",
+    )
+
     reactions: Mapped[list["PhotoReaction"]] = relationship(
         back_populates="photo",
         cascade="all, delete-orphan",
+        lazy="selectin",
     )
 
     def __repr__(self) -> str:

@@ -1,55 +1,92 @@
 from datetime import datetime, timezone
-from sqlalchemy import String, Text, Integer, Boolean, DateTime, ForeignKey
+from typing import TYPE_CHECKING
+
+from sqlalchemy import DateTime, ForeignKey, Index, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from typing import TYPE_CHECKING
-
+from app.models.news_type import NewsType
 
 if TYPE_CHECKING:
+    from app.models.user import User
+    from app.models.chip import Chip
+    from app.models.chip_comment import ChipComment
     from app.models.poll_vote import PollVote
 
+
 class News(Base):
+    """
+    Лента новостей.
+    
+    Типы событий (event_type) — см. NewsType.
+    """
     __tablename__ = "news"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    
-    # Тип события:
-    # - friend_comment  (комментарий друга)
-    # - game_record     (рекорд в игре)
-    # - new_chip        (новый вкус)
-    # - admin_post      (пост админа)
-    event_type: Mapped[str] = mapped_column(String(50), nullable=False)
-    
-    # Кто автор (для friend_comment, game_record)
+    id: Mapped[int] = mapped_column(
+        primary_key=True
+    )
+
+    event_type: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        index=True,
+    )
+
     user_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id"),
         nullable=True,
+        index=True,
     )
-    
-    # Связанные чипсы (для friend_comment, new_chip)
+
     chip_id: Mapped[int | None] = mapped_column(
         ForeignKey("chips.id"),
         nullable=True,
+        index=True,
     )
-    
-    # Текст новости
+
+    comment_id: Mapped[int | None] = mapped_column(
+        ForeignKey("chip_comments.id"),
+        nullable=True,
+        index=True,
+    )
+
     text: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    comment_id: Mapped[int | None] = mapped_column(  # ← добавили
-        ForeignKey("chip_comments.id"), nullable=True
-    )
-
-    
-    # Для рекордов — количество очков
     extra_data: Mapped[str | None] = mapped_column(Text, nullable=True)
-    
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+        index=True,
+    )
+
+    # ===== СВЯЗИ =====
+
+    user: Mapped["User | None"] = relationship(
+        back_populates="news",
+        lazy="selectin",
+    )
+
+    chip: Mapped["Chip | None"] = relationship(
+        back_populates="news",
+        lazy="selectin",
+    )
+
+    comment: Mapped["ChipComment | None"] = relationship(
+        lazy="selectin",
     )
 
     poll_votes: Mapped[list["PollVote"]] = relationship(
         back_populates="news",
         cascade="all, delete-orphan",
+        lazy="selectin",
     )
+
+    __table_args__ = (
+        Index("ix_news_user_created", "user_id", "created_at"),
+        Index("ix_news_event_created", "event_type", "created_at"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<News id={self.id} type={self.event_type} user_id={self.user_id}>"

@@ -1,45 +1,45 @@
 from datetime import datetime, timedelta, timezone
-from pwdlib import PasswordHash
-import jwt
 
-from app.core.config import SECRET_KEY, ALGORITHM
+import bcrypt
+from jose import JWTError, jwt
 
-password_hash = PasswordHash.recommended()
+from app.config import settings
 
 
 def hash_password(password: str) -> str:
-    return password_hash.hash(password)
+    """ Захешировать пароль """
+    password_bytes = password.encode("utf-8")[:72]
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password_bytes, salt)
+    return hashed.decode("utf-8")
 
-def verify_password(password: str, hashed_password: str) -> bool:
-    return password_hash.verify(password, hashed_password)
 
-def create_access_token(data: dict, expires_minutes: int = 50000):
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Проверить пароль по хешу"""
+    password_bytes = plain_password.encode("utf-8")[:72]
+    hashed_bytes = hashed_password.encode("utf-8")
+    return bcrypt.checkpw(password_bytes, hashed_bytes)
+
+
+def create_access_token(data: dict) -> str:
     to_encode = data.copy()
-    expire = datetime.now(
-        timezone.utc
-    ) + timedelta(
-        minutes=expires_minutes
+    expire = datetime.now(timezone.utc) + timedelta(
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
-
-    to_encode.update(
-        {
-            "exp": expire
-        }
-    )
-
+    to_encode.update({"exp": expire})
     return jwt.encode(
         to_encode,
-        SECRET_KEY,
-        algorithm=ALGORITHM,
+        settings.SECRET_KEY,
+        algorithm=settings.ALGORITHM,
     )
 
 
-def decode_access_token(token: str):
+def decode_access_token(token: str) -> dict | None:
     try:
         return jwt.decode(
             token,
-            SECRET_KEY,
-            algorithms=[ALGORITHM],
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
         )
-    except:
+    except JWTError:
         return None
