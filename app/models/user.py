@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from app.models.comment_reaction import CommentReaction
     from app.models.user_photo import UserPhoto  # ← добавили
     from app.models.photo_reaction import PhotoReaction  # ← добавили
+    from app.models.poll_vote import PollVote
 
 
 class User(Base):
@@ -113,6 +114,10 @@ class User(Base):
         lazy="selectin",
     )
 
+    poll_votes: Mapped[list["PollVote"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
 
     def __repr__(self) -> str:
         return f"<User id={self.id} username={self.username}>"
