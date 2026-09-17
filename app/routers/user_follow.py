@@ -25,7 +25,7 @@ router = APIRouter(
 
 # ПОДПИСКИ
 
-@router.post("/{user_id}/follow", response_model=UserFollowResponse)
+@router.post("/{user_id}", response_model=UserFollowResponse)
 def follow_user(
     user_id: int,
     db: Session = Depends(get_db),
@@ -66,7 +66,7 @@ def follow_user(
     return follow
 
 
-@router.delete("/{user_id}/follow", response_model=MessageResponse)
+@router.delete("/{user_id}", response_model=MessageResponse)
 def unfollow_user(
     user_id: int,
     db: Session = Depends(get_db),

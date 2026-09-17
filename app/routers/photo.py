@@ -126,6 +126,21 @@ def delete_photo(
     return MessageResponse(message="Фото удалено")
 
 
+@router.get("/images/{filename}")
+def get_image(filename: str):
+    if "/" in filename or "\\" in filename or ".." in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    filepath = settings.USER_PHOTOS_DIR / filename
+    try:
+        filepath.resolve().relative_to(settings.USER_PHOTOS_DIR.resolve())
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid path")
+
+    if not filepath.exists() or not filepath.is_file():
+        raise HTTPException(status_code=404)
+
+    return FileResponse(filepath)
 
 # ЛАЙКИ
 
