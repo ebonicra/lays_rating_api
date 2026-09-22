@@ -112,9 +112,18 @@ def delete_photo(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """ Удалить своё фото """
+    """ Удалить фото (своё или чужое, если админ) """
 
-    photo = get_photo_owned_by_user_or_404(db, photo_id, current_user.id)
+    photo = get_photo_or_404(db, photo_id)
+
+    is_owner = photo.user_id == current_user.id
+    is_admin = current_user.role in ("admin", "super_admin")
+
+    if not is_owner and not is_admin:
+        raise HTTPException(
+            status_code=403,
+            detail="Нет прав на удаление этого фото",
+        )
 
     filepath = settings.USER_PHOTOS_DIR / photo.image_path
     if filepath.exists():
@@ -124,7 +133,6 @@ def delete_photo(
     db.commit()
 
     return MessageResponse(message="Фото удалено")
-
 
 @router.get("/images/{filename}")
 def get_image(filename: str):

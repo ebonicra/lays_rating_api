@@ -9,6 +9,7 @@ from app.core.dependencies import get_current_user
 from app.database import get_db
 from app.models.user import User
 from app.schemas.user import UserResponse, UserUpdate
+from app.schemas.common import MessageResponse
 
 router = APIRouter(
     prefix="/users",
@@ -53,6 +54,15 @@ def update_profile(
 
     return current_user
 
+@router.delete("/me", response_model=MessageResponse)
+def delete_my_account(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """ Удалить свой аккаунт """
+    db.delete(current_user)
+    db.commit()
+    return MessageResponse(message="Аккаунт удалён")
 
 # АВАТАРКИ
 

@@ -98,10 +98,7 @@ def unfollow_user(
 @router.get("/{user_id}/followers", response_model=FollowersListResponse)
 def get_followers(
     user_id: int,
-    page: int = Query(1, ge=1),
-    per_page: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ):
     """ Список подписчиков пользователя """
     get_user_or_404(db, user_id)
@@ -115,8 +112,6 @@ def get_followers(
         db.query(UserFollow)
         .filter(UserFollow.following_id == user_id)
         .order_by(UserFollow.created_at.desc())
-        .offset((page - 1) * per_page)
-        .limit(per_page)
         .all()
     )
 
@@ -129,8 +124,6 @@ def get_followers(
 @router.get("/{user_id}/following", response_model=FollowingListResponse)
 def get_following(
     user_id: int,
-    page: int = Query(1, ge=1),
-    per_page: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
     """ Список подписок пользователя """
@@ -145,8 +138,6 @@ def get_following(
         db.query(UserFollow)
         .filter(UserFollow.follower_id == user_id)
         .order_by(UserFollow.created_at.desc())
-        .offset((page - 1) * per_page)
-        .limit(per_page)
         .all()
     )
 

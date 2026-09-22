@@ -198,7 +198,7 @@ def get_user_ratings(
             "name": chip.name,
             "average_rating": round(float(avg_rating or 0), 1),
             "rating_count": rating_count or 0,
-            "user_rating": user_rating_map.get(chip.id),
+            "my_rating": user_rating_map.get(chip.id),
             "image_path": chip.image_path,
         }
         for chip, avg_rating, rating_count in chips_data
