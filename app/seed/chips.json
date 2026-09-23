@@ -1,0 +1,162 @@
+[
+  {
+    "name": "Lay's Белые грибы со сметаной",
+    "category": "classic",
+    "description": "Химозный грибной вкус, но не очень химозный.",
+    "image_path": "белые_грибы_со_сметаной.jpg",
+    "collection": "Возвращаемый вкус",
+    "country": "Россия",
+    "release_year": 2011,
+    "available": true
+  },
+  {
+    "name": "Lay's Краб",
+    "category": "classic",
+    "description": "Крабовый рай для извращенцев.",
+    "image_path": "краб.jpg",
+    "collection": "Постоянный вкус",
+    "country": "Россия",
+    "release_year": 2005,
+    "available": true
+  },
+  {
+    "name": "Lay's Шашлык",
+    "category": "classic",
+    "description": "Единственный шашлык, который разочаровывает.",
+    "image_path": "шашлык.jpg",
+    "collection": "Возвращаемый вкус",
+    "country": "Россия",
+    "release_year": 2007,
+    "available": true
+  },
+  {
+    "name": "Lay's Соль и чёрный перец",
+    "category": "classic",
+    "description": "Неплохой вкус, особенно для тех, кому надоела просто соль.",
+    "image_path": "соль_и_черный_перец.jpg",
+    "collection": "Постоянный вкус",
+    "country": "Россия",
+    "release_year": 2026,
+    "available": true
+  },
+  {
+    "name": "Lay's Сыр чеддер с халапеньо по-мексикански",
+    "category": "classic",
+    "description": "Приятная остринка и сырный вкус, однако халапенью имеет свойство надоедать.",
+    "image_path": "сыр_чеддер_с_халапенью.jpg",
+    "collection": "Чемпионат мира по футболу",
+    "country": "Россия",
+    "release_year": 2026,
+    "available": true
+  },
+  {
+    "name": "Lay's Сыр",
+    "category": "classic",
+    "description": "Божестввенная классическая классика сырного вкуса.",
+    "image_path": "сыр.jpg",
+    "collection": "Постоянный вкус",
+    "country": "Россия",
+    "release_year": 2002,
+    "available": true
+  },
+  {
+    "name": "Lay's Нежный сыр с трюфелем",
+    "category": "classic",
+    "description": "Единственное, что может убить божественный вкус сыра - это дурацкий трюфель.",
+    "image_path": "нежный_сыр_с_трюфелем.jpg",
+    "collection": "Сезонный вкус",
+    "country": "Россия",
+    "release_year": 2022,
+    "available": true
+  },
+  {
+    "name": "Lay's С солью",
+    "category": "classic",
+    "description": "Классика, не такая жирная как обычный lay's. Можно их есть и думать, что вы не вредите своему организму.",
+    "image_path": "с_солью.jpg",
+    "collection": "Постоянный вкус",
+    "country": "Россия",
+    "release_year": 1996,
+    "available": true
+  },
+  {
+    "name": "Lay's Сметана и зелень",
+    "category": "classic",
+    "description": "Ну хорошо, когда хорошо, а когда со сметанкой, то вообще хорошо.",
+    "image_path": "сметана_и_зелень.jpg",
+    "collection": "Постоянный вкус",
+    "country": "Россия",
+    "release_year": 2005,
+    "available": true
+  },
+  {
+    "name": "Lay's Рождественское яблоко в карамели",
+    "category": "classic",
+    "description": "Если вы их не успели попробовать, то вы счастливый человек.",
+    "image_path": "рождественское_яблоко_в_карамели.jpg",
+    "collection": "Новогодняя коллекция 2024",
+    "country": "Россия",
+    "release_year": 2024,
+    "available": false
+  },
+  {
+    "name": "Lay's Красная икра",
+    "category": "classic",
+    "description": "Чипсы с красной икрой - один из предвестников нового года.",
+    "image_path": "красная_икра.jpg",
+    "collection": "Сезонный вкус",
+    "country": "Россия",
+    "release_year": 2009,
+    "available": true
+  },
+  {
+    "name": "Lay's Игристое",
+    "category": "classic",
+    "description": "Победить в номинации 'так делать никогда не надо'.",
+    "image_path": "игристое.jpg",
+    "collection": "Новогодняя коллекция 2024",
+    "country": "Россия",
+    "release_year": 2024,
+    "available": false
+  },
+  {
+    "name": "Lay's Жюльен с трюфельным соусом",
+    "category": "classic",
+    "description": "Приятный проходящий вкус, нежно и грибно.",
+    "image_path": "жульен_с_трюфельным_соусом.jpg",
+    "collection": "Новогодняя коллекция 2025",
+    "country": "Россия",
+    "release_year": 2025,
+    "available": false
+  },
+  {
+    "name": "Lay's Бекон",
+    "category": "classic",
+    "description": "Неоклассика, это когда классика надоела, а не классика тем более надоела, тогда можно брать бекон.",
+    "image_path": "бекон.jpg",
+    "collection": "Постоянный вкус",
+    "country": "Россия",
+    "release_year": 1996,
+    "available": true
+  },
+  {
+    "name": "Lay's Малосольные огурчики с укропом",
+    "category": "classic",
+    "description": "Для таких же истинных фанатов, как и чипсы со вкусом краба. Неплохо.",
+    "image_path": "молосольные_огурчики.jpg",
+    "collection": "Возвращаемый вкус",
+    "country": "Россия",
+    "release_year": 2010,
+    "available": true
+  },
+  {
+    "name": "Lay's Оливье с перепёлкой",
+    "category": "classic",
+    "description": "Победитель в номинации 'извращенец 2025 года'.",
+    "image_path": "оливье_с_перепелкой.jpg",
+    "collection": "Новогодняя коллекция 2025",
+    "country": "Россия",
+    "release_year": 2025,
+    "available": false
+  }
+]

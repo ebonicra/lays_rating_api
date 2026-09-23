@@ -128,8 +128,14 @@ def delete_comment(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """ Удалить свой комментарий """
-    comment = get_comment_owned_by_user_or_404(db, comment_id, current_user.id)
+    """ Удалить комментарий (свой или чужой, если админ) """
+    comment = get_comment_or_404(db, comment_id)
+
+    is_owner = comment.user_id == current_user.id
+    is_admin = current_user.role in ("admin", "super_admin")
+
+    if not is_owner and not is_admin:
+        raise HTTPException(status_code=403, detail="Нет прав на удаление")
 
     news = db.query(News).filter(News.comment_id == comment.id).first()
     if news:
@@ -139,7 +145,6 @@ def delete_comment(
     db.commit()
 
     return MessageResponse(message="Комментарий удалён")
-
 
 # РЕАКЦИИ НА КОММЕНТАРИИ
 

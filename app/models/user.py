@@ -82,6 +82,14 @@ class User(Base):
 
     news: Mapped[list["News"]] = relationship(
         back_populates="user",
+        foreign_keys="News.user_id",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+    targeted_news: Mapped[list["News"]] = relationship(
+        back_populates="target_user",
+        foreign_keys="News.target_user_id",
         cascade="all, delete-orphan",
         lazy="selectin",
     )

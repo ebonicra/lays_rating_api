@@ -42,7 +42,7 @@ def register(data: UserCreate, db: Session = Depends(get_db)):
     for category in settings.DEFAULT_CATEGORIES:
         user_filter = UserFilter(
             user_id=user.id,
-            category=category,
+            filter=category,
         )
         db.add(user_filter)
     db.commit()

@@ -41,20 +41,24 @@ def get_my_feed(
         .all()
     ]
 
-    # Основной запрос новостей
     news_query = (
         db.query(News)
         .outerjoin(User, News.user_id == User.id)
         .outerjoin(Chip, News.chip_id == Chip.id)
         .filter(
-            # Новости от друзей
+            # Новости от друзей (комментарии, игровые рекорды)
             (
                 News.event_type.in_([
                     NewsType.FRIEND_COMMENT.value,
                     NewsType.GAME_RECORD.value,
-                    NewsType.NEW_FOLLOWER.value,
                 ])
                 & (News.user_id.in_(friend_ids))
+            )
+            |
+            # Мои подписчики (кто подписался на меня)
+            (
+                (News.event_type == NewsType.NEW_FOLLOWER.value)
+                & (News.target_user_id == current_user.id)
             )
             |
             # Общие новости

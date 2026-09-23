@@ -11,7 +11,7 @@ from app.models.chip import Chip
 from app.models.chip_comment import ChipComment
 from app.models.chip_preference import ChipPreference
 from app.models.user import User
-from app.schemas.chip import ChipResponse
+from app.schemas.chip import ChipResponse, ChipRatingWithUserResponse
 
 router = APIRouter(
     prefix="/chips",
@@ -35,8 +35,20 @@ def get_chips(
 
     chips = query.all()
 
+    # Загружаем предпочтения одним запросом
+    chip_ids = [chip.id for chip in chips]
+    prefs = (
+        db.query(ChipPreference)
+        .filter(
+            ChipPreference.user_id == current_user.id,
+            ChipPreference.chip_id.in_(chip_ids),
+        )
+        .all()
+    )
+    prefs_map = {p.chip_id: p for p in prefs}
+
     return [
-        _format_chip_response(db, chip, current_user.id)
+        _format_chip_response(db, chip, current_user.id, prefs_map)
         for chip in chips
     ]
 
@@ -49,8 +61,51 @@ def get_chip(
 ):
     """ Информация о конкретных чипсах """
     chip = get_chip_or_404(db, chip_id)
-    return _format_chip_response(db, chip, current_user.id)
+    prefs = (
+        db.query(ChipPreference)
+        .filter(
+            ChipPreference.user_id == current_user.id,
+            ChipPreference.chip_id == chip.id,
+        )
+        .first()
+    )
+    prefs_map = {chip.id: prefs} if prefs else {}
 
+    return _format_chip_response(db, chip, current_user.id, prefs_map)
+
+
+@router.get("/{chip_id}/ratings", response_model=list[ChipRatingWithUserResponse])
+def get_chip_ratings(
+    chip_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """ Список оценок чипса с пользователями """
+    get_chip_or_404(db, chip_id)
+
+    ratings = (
+        db.query(ChipPreference)
+        .filter(
+            ChipPreference.chip_id == chip_id,
+            ChipPreference.rating.isnot(None),
+        )
+        .order_by(ChipPreference.updated_at.desc())   # сортировка по дате
+        .all()
+    )
+
+    return [
+        {
+            "user": {
+                "id": r.user.id,
+                "username": r.user.username,
+                "display_name": r.user.display_name,
+                "avatar_url": r.user.avatar_url,
+            },
+            "rating": r.rating,
+            "created_at": r.updated_at,
+        }
+        for r in ratings
+    ]
 
 # ОТДАЧА КАРТИНОК
 
@@ -74,6 +129,7 @@ def _format_chip_response(
     db: Session,
     chip: Chip,
     current_user_id: int,
+    prefs_map: dict[int, ChipPreference],
 ) -> dict:
     """ Формирует ответ для чипсов с рейтингом """
     rating = (
@@ -90,14 +146,10 @@ def _format_chip_response(
     average = rating[0] or 0
     count = rating[1] or 0
 
-    user_rating = (
-        db.query(ChipPreference.rating)
-        .filter(
-            ChipPreference.chip_id == chip.id,
-            ChipPreference.user_id == current_user_id,
-        )
-        .first()
-    )
+    pref = prefs_map.get(chip.id)
+    user_rating = pref.rating if pref else None
+    is_favorite = pref.is_favorite if pref else False
+    is_tried = pref.is_tried if pref else False
 
     comment_count = (
         db.query(func.count(ChipComment.id))
@@ -118,9 +170,11 @@ def _format_chip_response(
         "rating": {
             "average": round(float(average), 2),
             "count": count,
-            "user_rating": user_rating[0] if user_rating else None,
+            "user_rating": user_rating,
         },
         "comment_count": comment_count,
+        "is_favorite": is_favorite,
+        "is_tried": is_tried,
     }
 
 

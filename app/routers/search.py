@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from app.core.dependencies import get_current_user
 from app.database import get_db
@@ -40,7 +41,7 @@ def get_all_users(
     users = (
         db.query(User)
         .filter(User.id != current_user.id)
-        .order_by(User.username)
+        .order_by(func.lower(User.display_name).asc())
         .all()
     )
     

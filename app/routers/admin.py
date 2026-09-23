@@ -106,6 +106,26 @@ def update_chip(
     return chip
 
 
+@router.delete("/chips/{chip_id}", response_model=MessageResponse)
+def delete_chip(
+    chip_id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin),
+):
+    """ Удалить чипс """
+    chip = get_chip_or_404(db, chip_id)
+
+    # Удаляем картинку с диска
+    if chip.image_path:
+        filepath = settings.CHIP_IMAGES_DIR / chip.image_path
+        if filepath.exists():
+            filepath.unlink()
+
+    db.delete(chip)
+    db.commit()
+
+    return MessageResponse(message="Чипс удалён")
+
 @router.post("/chips/{chip_id}/image")
 async def upload_chip_image(
     chip_id: int,

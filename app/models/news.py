@@ -15,39 +15,32 @@ if TYPE_CHECKING:
 
 
 class News(Base):
-    """
-    Лента новостей.
-    
-    Типы событий (event_type) — см. NewsType.
-    """
     __tablename__ = "news"
 
-    id: Mapped[int] = mapped_column(
-        primary_key=True
-    )
+    id: Mapped[int] = mapped_column(primary_key=True)
 
     event_type: Mapped[str] = mapped_column(
-        String(50),
-        nullable=False,
-        index=True,
+        String(50), nullable=False, index=True,
     )
 
     user_id: Mapped[int | None] = mapped_column(
-        ForeignKey("users.id"),
+        ForeignKey("users.id"), nullable=True, index=True,
+    )
+
+    target_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
         nullable=True,
         index=True,
     )
 
     chip_id: Mapped[int | None] = mapped_column(
-        ForeignKey("chips.id"),
+        ForeignKey("chips.id", ondelete="CASCADE"),
         nullable=True,
         index=True,
     )
 
     comment_id: Mapped[int | None] = mapped_column(
-        ForeignKey("chip_comments.id"),
-        nullable=True,
-        index=True,
+        ForeignKey("chip_comments.id"), nullable=True, index=True,
     )
 
     text: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -65,6 +58,18 @@ class News(Base):
 
     user: Mapped["User | None"] = relationship(
         back_populates="news",
+        foreign_keys=[user_id],   # ← обязательно
+        lazy="selectin",
+    )
+
+    target_user: Mapped["User | None"] = relationship(
+        back_populates="targeted_news",   # ← добавить обратную связь
+        foreign_keys=[target_user_id],
+        lazy="selectin",
+    )
+    
+    target_user: Mapped["User | None"] = relationship(
+        foreign_keys=[target_user_id],
         lazy="selectin",
     )
 
@@ -86,7 +91,5 @@ class News(Base):
     __table_args__ = (
         Index("ix_news_user_created", "user_id", "created_at"),
         Index("ix_news_event_created", "event_type", "created_at"),
+        Index("ix_news_target_created", "target_user_id", "created_at"),
     )
-
-    def __repr__(self) -> str:
-        return f"<News id={self.id} type={self.event_type} user_id={self.user_id}>"

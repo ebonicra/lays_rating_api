@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 
@@ -21,6 +23,8 @@ class ChipResponse(BaseModel):
     available: bool
     rating: RatingResponse
     comment_count: int
+    is_favorite: bool
+    is_tried: bool  
 
     class Config:
         from_attributes = True
@@ -63,3 +67,16 @@ class ChipUpdate(BaseModel):
     release_year: int | None = Field(default=None, ge=1900, le=2100)
     country: str | None = None
     available: bool | None = None
+
+
+class ChipRatingUserResponse(BaseModel):
+    id: int
+    username: str
+    display_name: str
+    avatar_url: str | None = None
+
+
+class ChipRatingWithUserResponse(BaseModel):
+    user: ChipRatingUserResponse
+    rating: int
+    created_at: datetime

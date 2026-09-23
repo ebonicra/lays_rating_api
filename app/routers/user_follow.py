@@ -55,16 +55,15 @@ def follow_user(
     db.commit()
     db.refresh(follow)
 
-    # Новость «на вас подписались» для ленты user_id
     news = News(
         event_type=NewsType.NEW_FOLLOWER.value,
         user_id=current_user.id,
+        target_user_id=user_id,
     )
     db.add(news)
     db.commit()
 
     return follow
-
 
 @router.delete("/{user_id}", response_model=MessageResponse)
 def unfollow_user(
@@ -110,8 +109,9 @@ def get_followers(
 
     follows = (
         db.query(UserFollow)
+        .join(User, User.id == UserFollow.follower_id)
         .filter(UserFollow.following_id == user_id)
-        .order_by(UserFollow.created_at.desc())
+        .order_by(func.lower(User.display_name).asc())
         .all()
     )
 
@@ -136,8 +136,9 @@ def get_following(
 
     follows = (
         db.query(UserFollow)
+        .join(User, User.id == UserFollow.following_id)
         .filter(UserFollow.follower_id == user_id)
-        .order_by(UserFollow.created_at.desc())
+        .order_by(func.lower(User.display_name).asc())
         .all()
     )
 
