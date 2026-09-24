@@ -24,3 +24,8 @@ class NewsCreate(BaseModel):
     event_type: str = Field(pattern="^(admin_post|rumor|poll)$")
     text: str | None = Field(default=None, max_length=2000)
     extra_data: dict | None = None
+
+
+class NewsUpdate(BaseModel):
+    text: str | None = Field(default=None, max_length=2000)
+    extra_data: dict | None = None

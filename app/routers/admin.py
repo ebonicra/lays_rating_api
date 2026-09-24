@@ -13,9 +13,9 @@ from app.models.news import News
 from app.models.news_type import NewsType
 from app.models.user import User
 from app.models.user_role import UserRole
-from app.schemas.chip import ChipAdminResponse, ChipCreate, ChipUpdate
+from app.schemas.chip import ChipAdminResponse, ChipUpdate
 from app.schemas.common import MessageResponse
-from app.schemas.news import NewsCreate
+from app.schemas.news import NewsCreate, NewsUpdate
 from app.schemas.user import UserBriefResponse
 
 router = APIRouter(
@@ -194,6 +194,26 @@ def create_news(
 
     return {"id": news.id, "message": "Новость создана"}
 
+
+@router.put("/news/{news_id}", response_model=MessageResponse)
+def update_news(
+    news_id: int,
+    data: NewsUpdate,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin),
+):
+    """ Обновить новость """
+    news = get_news_or_404(db, news_id)
+
+    if data.text is not None:
+        news.text = data.text
+
+    if data.extra_data is not None:
+        news.extra_data = json.dumps(data.extra_data)
+
+    db.commit()
+
+    return MessageResponse(message="Новость обновлена")
 
 @router.post("/news/upload-image")
 async def upload_news_image(

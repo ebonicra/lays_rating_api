@@ -143,7 +143,7 @@
     "name": "Lay's Малосольные огурчики с укропом",
     "category": "classic",
     "description": "Для таких же истинных фанатов, как и чипсы со вкусом краба. Неплохо.",
-    "image_path": "молосольные_огурчики.jpg",
+    "image_path": "млосольные_огурчики.jpg",
     "collection": "Возвращаемый вкус",
     "country": "Россия",
     "release_year": 2010,
@@ -158,5 +158,216 @@
     "country": "Россия",
     "release_year": 2025,
     "available": false
+  },
+  {
+    "name": "Lay's Цитрусовый юдзу с чили",
+    "category": "classic",
+    "description": "Великолепный вкус, немного остро и немного цитрусово. Не сильно жирные, приятные на вкус.",
+    "image_path": "цитрусовый_юдзу_с_чили.jpg",
+    "collection": "Flamin' Hot 2025",
+    "country": "Россия",
+    "release_year": 2025,
+    "available": false
+  },
+  {
+    "name": "Lay's Чёрная икра",
+    "category": "classic",
+    "description": "Я понятие не имею, какая на вкус черная икра, но это был явно икорный вкус.",
+    "image_path": "черная_икра.jpg",
+    "collection": "Новогодняя коллекция 2024",
+    "country": "Россия",
+    "release_year": 2024,
+    "available": false
+  },
+  {
+    "name": "Lay's Зелёный лук",
+    "category": "classic",
+    "description": "Ну обычные чипсы с классическим вкусом зеленого лука, кому-то нравится, кому-то нет.",
+    "image_path": "зеленый_лук.jpg",
+    "collection": "Постоянный вкус",
+    "country": "Россия",
+    "release_year": 1996,
+    "available": true
+  },
+  {
+    "name": "Lay's Огненное тако с сальсой",
+    "category": "classic",
+    "description": "Острые, со вкусом вот этого соуса, которым заправляют тако.",
+    "image_path": "огненное_тако_с_сальсой.jpg",
+    "collection": "Flamin’ Hot 2025",
+    "country": "Россия",
+    "release_year": 2025,
+    "available": false
+  },
+  {
+    "name": "Lay's Рёбрышки гриль",
+    "category": "classic",
+    "description": "Чипсы не о чем. Ну мясной вкус, и что? А дальше они его перевыпустили в stax.",
+    "image_path": "ребрышки_гриль.jpg",
+    "collection": "Сезонный вкус",
+    "country": "Россия",
+    "release_year": 2020,
+    "available": false
+  },
+  {
+    "name": "Lay's Моцарелла с песто",
+    "category": "classic",
+    "description": "Всем фанатам песто - норм, всем не фанатам песто - мучение.",
+    "image_path": "моцарелла_с_песто.jpg",
+    "collection": "Лимитированный вкус",
+    "country": "Россия",
+    "release_year": 2023,
+    "available": false
+  },
+  {
+    "name": "Lay's Запечённый камамбер с грушей",
+    "category": "classic",
+    "description": "Немного сладкие, но в целом норм, нежный камамбер и кислинка груши.",
+    "image_path": "запеченный_камамбер_с_грушей.jpg",
+    "collection": "Новогодняя коллекция 2024",
+    "country": "Россия",
+    "release_year": 2024,
+    "available": false
+  },
+  {
+    "name": "Lay's Сырное ассорти с мёдом",
+    "category": "classic",
+    "description": "Хоть они и немного сладкие, но довольно прикольные, нежные и мед действительно чувствуется.",
+    "image_path": "сырное_ассотри_с_медом.jpg",
+    "collection": "Лимитированный вкус",
+    "country": "Россия",
+    "release_year": 2024,
+    "available": false
+  },
+  {
+    "name": "Lay's Духмяныя дранікі",
+    "category": "classic",
+    "description": "Привет от белорусов. Это чипсы со вкусом очень жирной картошки.",
+    "image_path": "драники.jpg",
+    "collection": "Региональные вкусы",
+    "country": "Россия",
+    "release_year": 2019,
+    "available": false
+  },
+  {
+    "name": "Lay's Уткой по-пекински",
+    "category": "classic",
+    "description": "Ну утка и утка, что вы там хотели увидеть, Пекин?.",
+    "image_path": "утка_по_пекински.jpg",
+    "collection": "Лето вокруг света",
+    "country": "Россия",
+    "release_year": 2024,
+    "available": false
+  },
+  {
+    "name": "Lay's Гуакамоле по-мексикански",
+    "category": "classic",
+    "description": "Потресающие чипсы, чуть-чуть острые и чуть-чуть кислые.",
+    "image_path": "гуакомоле_по_мексикански.jpg",
+    "collection": "Лето вокруг света",
+    "country": "Россия",
+    "release_year": 2024,
+    "available": false
+  },
+  {
+    "name": "Lay's Соус Манго-или",
+    "category": "classic",
+    "description": "Экзотический вкус, вкусно, кисло и приятно.",
+    "image_path": "соус_манго_чили.jpg",
+    "collection": "Лимитированный вкус",
+    "country": "Россия",
+    "release_year": 2023,
+    "available": false
+  },
+  {
+    "name": "Lay's Дижонская горчица",
+    "category": "classic",
+    "description": "Ни туда, ни сюда. Чуть-чуть остро, на этом всё.",
+    "image_path": "дижонская_горчица.jpg",
+    "collection": "Лето вокруг света",
+    "country": "Россия",
+    "release_year": 2024,
+    "available": false
+  },
+  {
+    "name": "Lay's Бешбармак",
+    "category": "classic",
+    "description": "Привет из Казахстана. При поедании этих чипс ни один казах не пострадал.",
+    "image_path": "бешбармак.jpg",
+    "collection": "Региональные вкусы",
+    "country": "Россия",
+    "release_year": 2023,
+    "available": false
+  },
+  {
+    "name": "Lay's Лисички в сметане",
+    "category": "baked",
+    "description": "Потрясающие вкус, нежный и грибной, не приедается, не наедается.",
+    "image_path": "лисички_в_сметане.jpg",
+    "collection": "Из печи",
+    "country": "Россия",
+    "release_year": 2019,
+    "available": true
+  },
+  {
+    "name": "Lay's Нежный сыр с зеленью",
+    "category": "baked",
+    "description": "Приятный ненавящевый вкус.",
+    "image_path": "нежный_сыр_с_зеленью.jpg",
+    "collection": "Из печи",
+    "country": "Россия",
+    "release_year": 2010,
+    "available": true
+  },
+  {
+    "name": "Lay's Королевский краб",
+    "category": "baked",
+    "description": "Краб, как краб, уже никто не отличит этого краба от легиндарного.",
+    "image_path": "королевский_краб.jpg",
+    "collection": "Из печи",
+    "country": "Россия",
+    "release_year": 2019,
+    "available": false
+  },
+  {
+    "name": "Lay's Хамон",
+    "category": "baked",
+    "description": "Ой, ну прекрасный вкус нежного мяса и нежирной картошки.",
+    "image_path": "хамон.jpg",
+    "collection": "Из печи",
+    "country": "Россия",
+    "release_year": 2023,
+    "available": true
+  },
+  {
+    "name": "Lay's Мусс из лосося с авокадо",
+    "category": "baked",
+    "description": "Авокадо и лосось там не чувствуется, но по сути вкусно.",
+    "image_path": "мусс_из_лосося_и_авокадо.jpg",
+    "collection": "Из печи",
+    "country": "Россия",
+    "release_year": 2025,
+    "available": true
+  },
+  {
+    "name": "Lay's Вяленые томаты и базилик",
+    "category": "baked",
+    "description": "Приятный необычный вкус, базилик легкий, а томаты не тяжелые.",
+    "image_path": "вяленые_томаты_и_базилик.jpg",
+    "collection": "Из печи",
+    "country": "Россия",
+    "release_year": 2024,
+    "available": true
+  },
+  {
+    "name": "Lay's Сметана и ароматные травы",
+    "category": "baked",
+    "description": "Ещё один невероятный вкус сметаны и зелени.",
+    "image_path": "сметана_и_ароматные_травы.jpg",
+    "collection": "Из печи",
+    "country": "Россия",
+    "release_year": 2020,
+    "available": false
   }
 ]
+
