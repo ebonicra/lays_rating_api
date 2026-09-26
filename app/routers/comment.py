@@ -21,6 +21,8 @@ from app.schemas.chip_comment import (
     ChipCommentUpdate,
     CommentReactionResponse,
     CommentReactionUpdate,
+    CommentReactionsListResponse,
+    CommentReactionUser,
 )
 from app.schemas.common import MessageResponse
 from app.schemas.user import UserBriefResponse
@@ -229,6 +231,40 @@ def remove_reaction(
 
     return MessageResponse(message="Реакция удалена")
 
+
+@router.get(
+    "/{comment_id}/reactions",
+    response_model=CommentReactionsListResponse,
+)
+def get_reactions(
+    comment_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """ Список тех, кто лайкнул/дизлайкнул комментарий """
+    get_comment_or_404(db, comment_id)
+
+    rows = (
+        db.query(CommentReaction)
+        .filter(CommentReaction.comment_id == comment_id)
+        .order_by(CommentReaction.created_at.desc())
+        .all()
+    )
+
+    likes: list[CommentReactionUser] = []
+    dislikes: list[CommentReactionUser] = []
+    for r in rows:
+        if r.user is None:
+            continue
+        item = CommentReactionUser(
+            id=r.user.id,
+            username=r.user.username,
+            display_name=r.user.display_name,
+            avatar_url=r.user.avatar_url,
+        )
+        (likes if r.is_like else dislikes).append(item)
+
+    return CommentReactionsListResponse(likes=likes, dislikes=dislikes)
 
 # ВСПОМОГАТЕЛЬНЫЕ
 

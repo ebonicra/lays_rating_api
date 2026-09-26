@@ -14,15 +14,27 @@ from app.models.chip_comment import ChipComment
 from app.models.chip_preference import ChipPreference
 from app.models.comment_reaction import CommentReaction
 from app.models.news import News
+from app.models.news_reaction import NewsReaction
 from app.models.news_type import NewsType
 from app.models.poll_vote import PollVote
 from app.models.user import User
 from app.models.user_follow import UserFollow
+from app.schemas.news import (
+    NewsReactionRequest,
+    NewsReactionUser,
+    NewsReactionsResponse,
+)
 
 router = APIRouter(
     prefix="/news",
     tags=["News"],
 )
+
+REACTABLE_EVENTS = {
+    NewsType.ADMIN_POST.value,
+    NewsType.RUMOR.value,
+    NewsType.POLL.value,
+}
 
 
 # ЛЕНТА НОВОСТЕЙ
@@ -41,7 +53,7 @@ def get_my_feed(
         .all()
     ]
 
-    news_query = (
+    news_list = (
         db.query(News)
         .outerjoin(User, News.user_id == User.id)
         .outerjoin(Chip, News.chip_id == Chip.id)
@@ -74,9 +86,18 @@ def get_my_feed(
         .all()
     )
 
+    # Батч-подсчёт реакций для всей ленты (2 запроса вместо 2*N)
+    news_ids = [n.id for n in news_list]
+    reactions_map = _load_reactions_for_news(db, news_ids, current_user.id)
+
     return [
-        _format_news_item(db, news, current_user)
-        for news in news_query
+        _format_news_item(
+            db,
+            news,
+            current_user,
+            reactions_map.get(news.id),
+        )
+        for news in news_list
     ]
 
 
@@ -84,8 +105,7 @@ def get_my_feed(
 
 @router.get("/images/{filename}")
 def get_news_image(filename: str):
-    """ Получить картинку новости по имени файла"""
-
+    """ Получить картинку новости по имени файла """
     filepath = settings.NEWS_IMAGES_DIR / filename
     if not filepath.exists():
         raise HTTPException(status_code=404, detail="Файл не найден")
@@ -164,13 +184,179 @@ def remove_vote(
     return {"message": "Голос отменён"}
 
 
+# РЕАКЦИИ НА НОВОСТИ
+
+@router.post("/{news_id}/reaction")
+def set_reaction(
+    news_id: int,
+    payload: NewsReactionRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Поставить лайк/дизлайк новости.
+    Если реакция уже стоит:
+      - та же    → снимаем
+      - другая   → меняем
+    """
+    news = get_news_or_404(db, news_id)
+
+    if news.event_type not in REACTABLE_EVENTS:
+        raise HTTPException(
+            status_code=400,
+            detail="На эту новость нельзя реагировать",
+        )
+
+    existing = (
+        db.query(NewsReaction)
+        .filter(
+            NewsReaction.news_id == news_id,
+            NewsReaction.user_id == current_user.id,
+        )
+        .first()
+    )
+
+    if existing and existing.is_like == payload.is_like:
+        # Та же реакция — снимаем
+        db.delete(existing)
+        db.commit()
+        my_reaction = None
+    elif existing:
+        # Меняем
+        existing.is_like = payload.is_like
+        db.commit()
+        my_reaction = payload.is_like
+    else:
+        # Новая
+        db.add(NewsReaction(
+            news_id=news_id,
+            user_id=current_user.id,
+            is_like=payload.is_like,
+        ))
+        db.commit()
+        my_reaction = payload.is_like
+
+    likes_count, dislikes_count = _count_reactions(db, news_id)
+
+    return {
+        "news_likes_count": likes_count,
+        "news_dislikes_count": dislikes_count,
+        "my_news_reaction": my_reaction,
+    }
+
+
+@router.get("/{news_id}/reactions", response_model=NewsReactionsResponse)
+def get_reactions(
+    news_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """ Список пользователей, лайкнувших/дизлайкнувших новость """
+    news = get_news_or_404(db, news_id)
+
+    if news.event_type not in REACTABLE_EVENTS:
+        raise HTTPException(
+            status_code=400,
+            detail="На эту новость нельзя реагировать",
+        )
+
+    rows = (
+        db.query(NewsReaction)
+        .filter(NewsReaction.news_id == news_id)
+        .order_by(NewsReaction.created_at.desc())
+        .all()
+    )
+
+    likes: list[NewsReactionUser] = []
+    dislikes: list[NewsReactionUser] = []
+    for r in rows:
+        if r.user is None:
+            continue
+        item = NewsReactionUser(
+            id=r.user.id,
+            username=r.user.username,
+            display_name=r.user.display_name,
+            avatar_url=r.user.avatar_url,
+        )
+        (likes if r.is_like else dislikes).append(item)
+
+    return NewsReactionsResponse(likes=likes, dislikes=dislikes)
+
 
 # ВСПОМОГАТЕЛЬНЫЕ
+
+def _count_reactions(db: Session, news_id: int) -> tuple[int, int]:
+    """ Вернуть (likes_count, dislikes_count) для одной новости """
+    rows = (
+        db.query(NewsReaction.is_like, func.count(NewsReaction.id))
+        .filter(NewsReaction.news_id == news_id)
+        .group_by(NewsReaction.is_like)
+        .all()
+    )
+    likes = 0
+    dislikes = 0
+    for is_like, count in rows:
+        if is_like:
+            likes = count
+        else:
+            dislikes = count
+    return likes, dislikes
+
+
+def _load_reactions_for_news(
+    db: Session,
+    news_ids: list[int],
+    user_id: int,
+) -> dict[int, dict]:
+    """
+    Батч-подсчёт реакций для ленты.
+    Возвращает {news_id: {"likes": int, "dislikes": int, "my": bool | None}}.
+    """
+    if not news_ids:
+        return {}
+
+    result: dict[int, dict] = {
+        nid: {"likes": 0, "dislikes": 0, "my": None}
+        for nid in news_ids
+    }
+
+    # Счётчики лайков/дизлайков по всем новостям сразу
+    agg = (
+        db.query(
+            NewsReaction.news_id,
+            NewsReaction.is_like,
+            func.count(NewsReaction.id),
+        )
+        .filter(NewsReaction.news_id.in_(news_ids))
+        .group_by(NewsReaction.news_id, NewsReaction.is_like)
+        .all()
+    )
+    for news_id, is_like, count in agg:
+        if is_like:
+            result[news_id]["likes"] = count
+        else:
+            result[news_id]["dislikes"] = count
+
+    # Мои реакции по всем новостям сразу
+    mine = (
+        db.query(NewsReaction.news_id, NewsReaction.is_like)
+        .filter(
+            NewsReaction.news_id.in_(news_ids),
+            NewsReaction.user_id == user_id,
+        )
+        .all()
+    )
+    for news_id, is_like in mine:
+        result[news_id]["my"] = is_like
+
+    return result
+
 
 def _format_news_item(
     db: Session,
     news: News,
     current_user: User,
+    reactions: dict | None = None,
 ) -> dict:
     """ Преобразовать новость в ответ """
     item = {
@@ -218,7 +404,7 @@ def _format_news_item(
     if news.extra_data:
         item["extra_data"] = _parse_extra_data(news.extra_data)
 
-    # Данные комментария (для friend_comment)
+    # Данные комментария (для friend_comment) — отдельные ключи
     if news.comment_id:
         comment = (
             db.query(ChipComment)
@@ -227,10 +413,10 @@ def _format_news_item(
         )
         if comment:
             item["comment_id"] = comment.id
-            item["likes_count"] = comment.likes_count
-            item["dislikes_count"] = comment.dislikes_count
+            item["comment_likes_count"] = comment.likes_count
+            item["comment_dislikes_count"] = comment.dislikes_count
 
-        my_reaction = (
+        my_comment_reaction = (
             db.query(CommentReaction)
             .filter(
                 CommentReaction.comment_id == news.comment_id,
@@ -238,7 +424,15 @@ def _format_news_item(
             )
             .first()
         )
-        item["my_reaction"] = my_reaction.is_like if my_reaction else None
+        item["my_comment_reaction"] = (
+            my_comment_reaction.is_like if my_comment_reaction else None
+        )
+
+    # Реакции новости — отдельные ключи (только для реагируемых типов)
+    if news.event_type in REACTABLE_EVENTS and reactions is not None:
+        item["news_likes_count"] = reactions["likes"]
+        item["news_dislikes_count"] = reactions["dislikes"]
+        item["my_news_reaction"] = reactions["my"]
 
     return item
 
@@ -297,8 +491,9 @@ def _parse_extra_data(extra_data: str | None) -> dict:
         return {}
 
 
-
-# /news/feed           GET    - лента новостей текущего пользователя
-# /news/images/{file}  GET    - отдать картинку новости
-# /news/{news_id}/vote POST   - проголосовать в опросе
-# /news/{news_id}/vote DELETE - убрать свой голос
+# /news/feed                    GET    - лента новостей текущего пользователя
+# /news/images/{file}           GET    - отдать картинку новости
+# /news/{news_id}/vote          POST   - проголосовать в опросе
+# /news/{news_id}/vote          DELETE - убрать свой голос
+# /news/{news_id}/reaction      POST   - поставить/сменить/снять реакцию
+# /news/{news_id}/reactions     GET    - список лайкнувших/дизлайкнувших

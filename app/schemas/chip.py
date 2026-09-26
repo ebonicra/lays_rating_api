@@ -80,3 +80,11 @@ class ChipRatingWithUserResponse(BaseModel):
     user: ChipRatingUserResponse
     rating: int
     created_at: datetime
+
+class ChipCategoryStats(BaseModel):
+    total: int
+    tried: int
+
+
+class ChipStatsResponse(BaseModel):
+    stats: dict[str, ChipCategoryStats]

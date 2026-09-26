@@ -11,6 +11,7 @@ from app.models import (
     comment_reaction,
     news_type,
     news,
+    news_reaction,
     photo_reaction,
     poll_vote,
     user_filter,
@@ -18,6 +19,7 @@ from app.models import (
     user_photo,
     user_role,
     user,
+    feedback,
 )
 
 from app.routers import (
@@ -33,6 +35,7 @@ from app.routers import (
     user_filter,         # ← /filters
     user_follow,         # ← /follows/{id}, /follows/{id}/followers
     user,                # ← /users/me, /users/{id}, /users/avatars
+    feedback,
 )
 
 

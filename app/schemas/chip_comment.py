@@ -42,3 +42,16 @@ class ChipCommentUpdate(BaseModel):
 class CommentReactionUpdate(BaseModel):
     """ Поставить/изменить реакцию на комментарий """
     is_like: bool
+
+class CommentReactionUser(BaseModel):
+    """ Краткая инфа о пользователе, поставившем реакцию """
+    id: int
+    username: str
+    display_name: str | None = None
+    avatar_url: str | None = None
+
+
+class CommentReactionsListResponse(BaseModel):
+    """ Список лайкнувших и дизлайкнувших комментарий """
+    likes: list[CommentReactionUser]
+    dislikes: list[CommentReactionUser]

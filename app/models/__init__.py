@@ -11,6 +11,8 @@ from app.models.comment_reaction import CommentReaction
 from app.models.news import News
 from app.models.news_type import NewsType
 from app.models.poll_vote import PollVote
+from app.models.news_reaction import NewsReaction
+from app.models.feedback import Feedback
 
 __all__ = [
     "User",
@@ -26,4 +28,5 @@ __all__ = [
     "News",
     "NewsType",
     "PollVote",
+    "NewsReaction",
 ]

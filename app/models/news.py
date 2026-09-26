@@ -12,6 +12,8 @@ if TYPE_CHECKING:
     from app.models.chip import Chip
     from app.models.chip_comment import ChipComment
     from app.models.poll_vote import PollVote
+    from app.models.news_reaction import NewsReaction
+
 
 
 class News(Base):
@@ -67,11 +69,6 @@ class News(Base):
         foreign_keys=[target_user_id],
         lazy="selectin",
     )
-    
-    target_user: Mapped["User | None"] = relationship(
-        foreign_keys=[target_user_id],
-        lazy="selectin",
-    )
 
     chip: Mapped["Chip | None"] = relationship(
         back_populates="news",
@@ -83,6 +80,12 @@ class News(Base):
     )
 
     poll_votes: Mapped[list["PollVote"]] = relationship(
+        back_populates="news",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+    reactions: Mapped[list["NewsReaction"]] = relationship(
         back_populates="news",
         cascade="all, delete-orphan",
         lazy="selectin",

@@ -11,7 +11,7 @@ from app.models.chip import Chip
 from app.models.chip_comment import ChipComment
 from app.models.chip_preference import ChipPreference
 from app.models.user import User
-from app.schemas.chip import ChipResponse, ChipRatingWithUserResponse
+from app.schemas.chip import ChipResponse, ChipRatingWithUserResponse, ChipStatsResponse, ChipCategoryStats
 
 router = APIRouter(
     prefix="/chips",
@@ -20,6 +20,53 @@ router = APIRouter(
 
 
 # ЧИПСЫ
+
+@router.get("/stats", response_model=ChipStatsResponse)
+def get_chip_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Статистика по категориям чипсов (по всей базе, без фильтров):
+    - total: сколько всего чипсов в категории
+    - tried: сколько из них пользователь попробовал
+    """
+    # total по категориям
+    total_rows = (
+        db.query(Chip.category, func.count(Chip.id))
+        .group_by(Chip.category)
+        .all()
+    )
+    totals = {cat: cnt for cat, cnt in total_rows}
+
+    # tried по категориям
+    tried_rows = (
+        db.query(Chip.category, func.count(ChipPreference.id))
+        .join(
+            ChipPreference,
+            ChipPreference.chip_id == Chip.id,
+        )
+        .filter(
+            ChipPreference.user_id == current_user.id,
+            ChipPreference.is_tried.is_(True),
+        )
+        .group_by(Chip.category)
+        .all()
+    )
+    trieds = {cat: cnt for cat, cnt in tried_rows}
+
+    # Собираем итоговый словарь по всем категориям из enum,
+    # чтобы фронт всегда получал запись для каждой категории
+    stats: dict[str, ChipCategoryStats] = {}
+    for ct in settings.DEFAULT_CATEGORIES:
+        key = ct.value if hasattr(ct, "value") else str(ct)
+        stats[key] = ChipCategoryStats(
+            total=totals.get(ct.value if hasattr(ct, "value") else ct, 0),
+            tried=trieds.get(ct.value if hasattr(ct, "value") else ct, 0),
+        )
+
+    return ChipStatsResponse(stats=stats)
+
 
 @router.get("", response_model=list[ChipResponse])
 def get_chips(
@@ -106,6 +153,7 @@ def get_chip_ratings(
         }
         for r in ratings
     ]
+
 
 # ОТДАЧА КАРТИНОК
 

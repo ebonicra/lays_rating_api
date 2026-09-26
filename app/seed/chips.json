@@ -368,6 +368,306 @@
     "country": "Россия",
     "release_year": 2020,
     "available": false
+  },
+  {
+    "name": "Lay's Нежный сыр с луком",
+    "category": "ridged",
+    "description": "Приятные чипсики, нежный вкус зелени, но больше сливочные, так что норм.",
+    "image_path": "нежный_сыр_с_луком.jpg",
+    "collection": "Сезонный вкус",
+    "country": "Россия",
+    "release_year": 2018,
+    "available": true
+  },
+  {
+    "name": "Lay's Чили и лайм",
+    "category": "ridged",
+    "description": "Лучшие, просто лучшие чипсы из всех существующих чипс. Острые как надо, кислые как надо, жирные, как не надо.",
+    "image_path": "чили_и_лайм.jpg",
+    "collection": "Постоянный вкус",
+    "country": "Россия",
+    "release_year": 2020,
+    "available": true
+  },
+  {
+    "name": "Lay's Донер по-хорватски",
+    "category": "ridged",
+    "description": "Классическая многовкусовая мешанина, главное что-нибудь выпустить в линейку и добавить остринки.",
+    "image_path": "донер_по_хорватски.jpg",
+    "collection": "Чемпионат мира по футболу",
+    "country": "Россия",
+    "release_year": 2026,
+    "available": true
+  },
+  {
+    "name": "Lay's Лангустины в пикантном соусе",
+    "category": "ridged",
+    "description": "Ни рыба - ни мясо, ни картошка - ни чипсы.",
+    "image_path": "лангустины_в_пикантном_соусе.jpg",
+    "collection": "Сезонный вкус",
+    "country": "Россия",
+    "release_year": 2026,
+    "available": true
+  },
+  {
+    "name": "Lay's Колбаски братвурст по-немецки",
+    "category": "ridged",
+    "description": "Если есть чуть-чуть, то вкус колбасы вам не успеет надоесть. Так что кушайте чуть-чуть.",
+    "image_path": "колбаски_братвурст_по_немецки.jpg",
+    "collection": "Чемпионат мира по футболу",
+    "country": "Россия",
+    "release_year": 2026,
+    "available": true
+  },
+  {
+    "name": "Lay's Пряная креветка",
+    "category": "ridged",
+    "description": "Креветка такая пряная и такая легкая, что она почти не чувствуется.",
+    "image_path": "пряная_креветка.jpg",
+    "collection": "Сезонный вкус",
+    "country": "Россия",
+    "release_year": 2024,
+    "available": true
+  },
+  {
+    "name": "Lay's Сметана и лук",
+    "category": "ridged",
+    "description": "Прекрасный добрый вкус, если у вас нет отвращения к луку, то вообще классно.",
+    "image_path": "сметана_и_лук.jpg",
+    "collection": "Постоянный вкус",
+    "country": "Россия",
+    "release_year": 2005,
+    "available": true
+  },
+  {
+    "name": "Lay's Паприка",
+    "category": "ridged",
+    "description": "Паприкой сложно испортить что-либо, так что чипсы классные.",
+    "image_path": "паприка.jpg",
+    "collection": "Постоянный вкус",
+    "country": "Россия",
+    "release_year": 1996,
+    "available": true
+  },
+  {
+    "name": "Lay's Лосось в сливочном соусе",
+    "category": "ridged",
+    "description": "Нежный, слегка уловимый вкус рыбки, фаворит для всех девочек.",
+    "image_path": "лосось_в_сливочном_соусе.jpg",
+    "collection": "Постоянный вкус",
+    "country": "Россия",
+    "release_year": 2020,
+    "available": true
+  },
+  {
+    "name": "Lay's Лобстер",
+    "category": "ridged",
+    "description": "Морской вкус и пряные нотки - так сказал ИИ.",
+    "image_path": "лобстер.jpg",
+    "collection": "Постоянный вкус",
+    "country": "Россия",
+    "release_year": 2017,
+    "available": true
+  },
+  {
+    "name": "Lay's Том Ям по-тайски",
+    "category": "ridged",
+    "description": "Прикольный вкус том яма, нежный и со специями, но быстро надоедает.",
+    "image_path": "том_ям_по_тайски.jpg",
+    "collection": "Лето вокруг света",
+    "country": "Россия",
+    "release_year": 2024,
+    "available": false
+  },
+  {
+    "name": "Lay's Раки в пряном соусе",
+    "category": "ridged",
+    "description": "Насыщенный рыбный вкус, с пивом потянет, без пива вряд ли.",
+    "image_path": "раки_в_пряном_соусе.jpg",
+    "collection": "Барная коллекция",
+    "country": "Россия",
+    "release_year": 2025,
+    "available": false
+  },
+  {
+    "name": "Lay's Гребешки в сливочно-пикантном соусе",
+    "category": "ridged",
+    "description": "Прекрасные и очень нежные чипсики с рыбной ноткой.",
+    "image_path": "гребешки_в_сливочно_пикантном_соусе.jpg",
+    "collection": "Сезонный вкус",
+    "country": "Россия",
+    "release_year": 2025,
+    "available": false
+  },
+  {
+    "name": "Lay's Острая креветка васаби",
+    "category": "ridged",
+    "description": "Никакая не острая, никакая не креветка, я не знаю, с каким они были вкусом.",
+    "image_path": "острая_креветка_васаби.jpg",
+    "collection": "Flamin' Hot 2025",
+    "country": "Россия",
+    "release_year": 2025,
+    "available": false
+  },
+  {
+    "name": "Lay's Острые крылышки",
+    "category": "ridged",
+    "description": "Вот они по-настоящему острые, такие острые, что ны крылышки, ни картошка не существует.",
+    "image_path": "острые_крылышки.jpg",
+    "collection": "Сезонный вкус",
+    "country": "Россия",
+    "release_year": 2023,
+    "available": false
+  },
+  {
+    "name": "Lay's Вкус вдохновленный KFC",
+    "category": "ridged",
+    "description": "Что-то на богатом, счастливом и несанкционном.",
+    "image_path": "вкус_вдохновленный_кфс.jpg",
+    "collection": "Лимитированная коллоборация",
+    "country": "Россия",
+    "release_year": 2021,
+    "available": false
+  },
+  {
+    "name": "Lay's Куриные крылья BBQ",
+    "category": "ridged",
+    "description": "Никто и не заметил, что существовал такой вкус, потому что он быстро переехал в линейку MAXX.",
+    "image_path": "куриные_крылья_bbq.jpg",
+    "collection": "Барная коллекция",
+    "country": "Россия",
+    "release_year": 2025,
+    "available": false
+  },
+  {
+    "name": "Lay's Куриные крылышки барбекю",
+    "category": "maxx",
+    "description": "Ужасный насыщенный вкус мяса, сладковато‑копчёный профиль с дымком и пряными нотками.",
+    "image_path": "куриные_крылышки_барбекю.jpg",
+    "collection": "Lay's Maxx",
+    "country": "Россия",
+    "release_year": 2014,
+    "available": true
+  },
+  {
+    "name": "Lay's Пицца 4 сыра",
+    "category": "maxx",
+    "description": "Сырный, но не пиццный вкус, но всё равно приятный.",
+    "image_path": "пицца_4_сыра.jpg",
+    "collection": "Lay's Maxx",
+    "country": "Россия",
+    "release_year": 2018,
+    "available": true
+  },
+  {
+    "name": "Lay's Двойной гамбургер",
+    "category": "maxx",
+    "description": "Вкус с нотками говяжьей котлеты, расплавленного сыра и свежих овощей, которые вообще не чувствуются.",
+    "image_path": "двойной_гамбургер.jpg",
+    "collection": "Lay's Maxx",
+    "country": "Россия",
+    "release_year": 2025,
+    "available": true
+  },
+  {
+    "name": "Lay's Грибы в сливочном соусе",
+    "category": "maxx",
+    "description": "Невероятный грибной химозный вкус, но очень вкусный.",
+    "image_path": "грибы_в_сливочном_соусе.jpg",
+    "collection": "Lay's Maxx",
+    "country": "Россия",
+    "release_year": 2018,
+    "available": false
+  },
+  {
+    "name": "Lay's Пицца пепперони",
+    "category": "maxx",
+    "description": "Яркий, пряный, с нотами томатного соуса и пикантной пепперони вкус, усиленный насыщенным сырным оттенком.",
+    "image_path": "пицца_пепперони.jpg",
+    "collection": "Лимитированная коллоборация с Додо",
+    "country": "Россия",
+    "release_year": 2026,
+    "available": true
+  },
+  {
+    "name": "Lay's Соус 1000 островов",
+    "category": "stix",
+    "description": "Сливочно-томатный вкус псевдо-картошки фри.",
+    "image_path": "соус_1000_островов.jpg",
+    "collection": "Lay's Stix",
+    "country": "Россия",
+    "release_year": 2025,
+    "available": true
+  },
+  {
+    "name": "Lay's Сырный соус",
+    "category": "stix",
+    "description": "Нежнейший дешевый сырный вкус.",
+    "image_path": "сырный_соус.jpg",
+    "collection": "Lay's Stix",
+    "country": "Россия",
+    "release_year": 2025,
+    "available": true
+  },
+  {
+    "name": "Lay's Соус BBQ",
+    "category": "stix",
+    "description": "Нежные воздушные палочки с классическим вкусом соуса барбекю.",
+    "image_path": "соус_bbq.jpg",
+    "collection": "Lay's Stix",
+    "country": "Россия",
+    "release_year": 2025,
+    "available": true
+  },
+  {
+    "name": "Lay's Сметана и лук stix",
+    "category": "stix",
+    "description": "Классический вкус сметаны и зелени, который можно перепутать с тысячими таких вкусов у lay's.",
+    "image_path": "сметана_и_лук_stix.jpg",
+    "collection": "Lay's Stix",
+    "country": "Россия",
+    "release_year": 2018,
+    "available": false
+  },
+  {
+    "name": "Lay's Кетчуп",
+    "category": "stix",
+    "description": "Картошка со вкусом картошки фри и кетчупа.",
+    "image_path": "кетчуп.jpg",
+    "collection": "Lay's Stix",
+    "country": "Россия",
+    "release_year": 2018,
+    "available": false
+  },
+  {
+    "name": "Lay's Ароматные рёбрышки барбекю",
+    "category": "stax",
+    "description": "Капченая магия и вкус мангала, и ещё немного мяса.",
+    "image_path": "ароматные_ребрышки_барбекю.jpg",
+    "collection": "Lay's Stax",
+    "country": "Россия",
+    "release_year": 2020,
+    "available": true
+  },
+  {
+    "name": "Lay's Нежная сметана и лук",
+    "category": "stax",
+    "description": "Ну как сметана с луком, только нежные и в банке. А из банки всегда вкуснее.",
+    "image_path": "нежная_сметана_и_лук.jpg",
+    "collection": "Lay's Stax",
+    "country": "Россия",
+    "release_year": 2020,
+    "available": true
+  },
+  {
+    "name": "Lay's Пикантная паприка",
+    "category": "stax",
+    "description": "Добрые нежные чипсы со вкусом специй, которые не надоедают.",
+    "image_path": "пикантная_паприка.jpg",
+    "collection": "Lay's Stax",
+    "country": "Россия",
+    "release_year": 2020,
+    "available": true
   }
 ]
 

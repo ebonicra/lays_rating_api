@@ -29,3 +29,19 @@ class NewsCreate(BaseModel):
 class NewsUpdate(BaseModel):
     text: str | None = Field(default=None, max_length=2000)
     extra_data: dict | None = None
+
+
+class NewsReactionRequest(BaseModel):
+    is_like: bool
+
+
+class NewsReactionUser(BaseModel):
+    id: int
+    username: str
+    display_name: str | None = None
+    avatar_url: str | None = None
+
+
+class NewsReactionsResponse(BaseModel):
+    likes: list[NewsReactionUser]
+    dislikes: list[NewsReactionUser]
