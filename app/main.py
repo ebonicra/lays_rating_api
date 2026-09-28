@@ -52,6 +52,8 @@ def include_routers(app: FastAPI) -> None:
     app.include_router(photo.router)         # /photos/*
     app.include_router(news.router)          # /news/*
     app.include_router(admin.router)         # /admin/*
+    app.include_router(feedback.user_router)
+    app.include_router(feedback.admin_router)
 
 
 

@@ -1,15 +1,13 @@
 import json
-
-
 import uuid
 from pathlib import Path
-from fastapi import UploadFile, File
-from app.config import settings
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from fastapi.responses import FileResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.core.dependencies import get_current_user
 from app.database import get_db
 from app.models.feedback import Feedback
@@ -19,7 +17,38 @@ from app.schemas.feedback import (
     FeedbackCreate,
     FeedbackListResponse,
     FeedbackResponse,
+    FeedbackReadUpdate,
 )
+from app.schemas.user import UserBriefResponse
+
+
+# ============================================================
+# ХЕЛПЕР
+# ============================================================
+
+def _feedback_to_response(feedback: Feedback) -> FeedbackResponse:
+    paths: list[str] = []
+    if feedback.image_paths:
+        try:
+            paths = json.loads(feedback.image_paths)
+        except (json.JSONDecodeError, TypeError):
+            paths = []
+
+    return FeedbackResponse(
+        id=feedback.id,
+        user=UserBriefResponse(
+            id=feedback.user.id,
+            username=feedback.user.username,
+            display_name=feedback.user.display_name,
+            avatar_url=feedback.user.avatar_url,
+        ),
+        type=feedback.type,
+        title=feedback.title,
+        text=feedback.text,
+        image_paths=paths,
+        is_read=feedback.is_read,
+        created_at=feedback.created_at,
+    )
 
 
 # ============================================================
@@ -48,7 +77,50 @@ def send_feedback(
     db.add(feedback)
     db.commit()
     db.refresh(feedback)
-    return feedback
+    return _feedback_to_response(feedback)
+
+
+@user_router.post("/images")
+async def upload_feedback_image(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+):
+    """ Загрузить картинку для feedback. Возвращает путь. """
+    # Проверка расширения — как в чипсах
+    ext = file.filename.split(".")[-1].lower() if "." in file.filename else ""
+    if ext not in settings.ALLOWED_IMAGE_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Допустимы только JPEG, PNG, WebP. Получен: .{ext}",
+        )
+
+    # Проверка размера
+    contents = await file.read()
+    if len(contents) > settings.MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Файл слишком большой "
+                f"(макс {settings.MAX_FILE_SIZE // 1024 // 1024} МБ)"
+            ),
+        )
+
+    # Сохраняем
+    filename = f"feedback_{current_user.id}_{uuid.uuid4().hex[:8]}.{ext}"
+    filepath = settings.FEEDBACK_IMAGES_DIR / filename
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(filepath, "wb") as f:
+        f.write(contents)
+
+    return {"image_path": filename}
+
+@user_router.get("/images/{filename}")
+def get_feedback_image(filename: str):
+    filepath = settings.FEEDBACK_IMAGES_DIR / filename
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail="Файл не найден")
+    return FileResponse(str(filepath))
 
 
 # ============================================================
@@ -101,29 +173,29 @@ def get_feedback_list(
     )
 
     return FeedbackListResponse(
-        items=items,
+        items=[_feedback_to_response(f) for f in items],
         total_count=total_count,
         unread_count=unread_count,
     )
 
-
 @admin_router.put("/{feedback_id}/read", response_model=FeedbackResponse)
-def mark_as_read(
+def set_read_status(
     feedback_id: int,
+    data: FeedbackReadUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """ Отметить сообщение как прочитанное (только админ) """
+    """ Поставить/снять отметку «прочитано» (только админ) """
     _require_admin(current_user)
 
     feedback = db.query(Feedback).filter(Feedback.id == feedback_id).first()
     if feedback is None:
         raise HTTPException(status_code=404, detail="Сообщение не найдено")
 
-    feedback.is_read = True
+    feedback.is_read = data.is_read
     db.commit()
     db.refresh(feedback)
-    return feedback
+    return _feedback_to_response(feedback)
 
 
 @admin_router.delete("/{feedback_id}", response_model=MessageResponse)
@@ -139,32 +211,16 @@ def delete_feedback(
     if feedback is None:
         raise HTTPException(status_code=404, detail="Сообщение не найдено")
 
+    # Заодно можно удалить прикреплённые картинки с диска
+    if feedback.image_paths:
+        try:
+            for name in json.loads(feedback.image_paths):
+                p = settings.FEEDBACK_IMAGES_DIR / name
+                if p.exists():
+                    p.unlink()
+        except (json.JSONDecodeError, TypeError, OSError):
+            pass
+
     db.delete(feedback)
     db.commit()
     return MessageResponse(message="Сообщение удалено")
-
-@user_router.post("/images")
-async def upload_feedback_image(
-    file: UploadFile = File(...),
-    current_user: User = Depends(get_current_user),
-):
-    """ Загрузить картинку для feedback. Возвращает путь. """
-    # Проверка типа
-    if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Только изображения")
-
-    # Проверка размера (например, не больше 5 МБ)
-    contents = await file.read()
-    if len(contents) > 5 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="Максимум 5 МБ")
-
-    # Сохраняем с уникальным именем
-    ext = Path(file.filename or "").suffix.lower() or ".jpg"
-    filename = f"{uuid.uuid4().hex}{ext}"
-    filepath = settings.FEEDBACK_IMAGES_DIR / filename
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-
-    with open(filepath, "wb") as f:
-        f.write(contents)
-
-    return {"image_path": filename}

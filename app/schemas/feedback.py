@@ -29,3 +29,6 @@ class FeedbackListResponse(BaseModel):
     items: list[FeedbackResponse]
     total_count: int
     unread_count: int
+
+class FeedbackReadUpdate(BaseModel):
+    is_read: bool

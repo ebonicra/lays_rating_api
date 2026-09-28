@@ -333,6 +333,24 @@ def remove_admin(
     return MessageResponse(message=f"{user.username} больше не админ")
 
 
+@router.delete("/users/{user_id}", response_model=MessageResponse)
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin),
+):
+    """ Удалить пользователя (только админ) """
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    if user.role == "super_admin" and current_admin.role != "super_admin":
+        raise HTTPException(status_code=403, detail="Недостаточно прав")
+
+    db.delete(user)
+    db.commit()
+    return MessageResponse(message="Пользователь удалён")
+
 
 # /admin/chips                   POST   - создать чипсы
 # /admin/chips/{chip_id}         PUT    - обновить чипсы

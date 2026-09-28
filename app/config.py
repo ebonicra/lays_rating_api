@@ -21,6 +21,7 @@ class Settings:
     CHIP_IMAGES_DIR  = UPLOADS_DIR / "chip_images"    # картинки чипсов
     NEWS_IMAGES_DIR  = UPLOADS_DIR / "news_images"    # картинки новостей
     USER_PHOTOS_DIR  = UPLOADS_DIR / "user_photos"    # фото пользователей
+    FEEDBACK_IMAGES_DIR = UPLOADS_DIR / "feedback_images"
     
     # Лимиты
     MAX_FILE_SIZE: int = 5 * 1024 * 1024  # 5 МБ
