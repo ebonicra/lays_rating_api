@@ -17,6 +17,8 @@ if TYPE_CHECKING:
     from app.models.photo_reaction import PhotoReaction
     from app.models.news import News
     from app.models.poll_vote import PollVote
+    from app.models.game_record import GameRecord
+
 
 
 class User(Base):
@@ -147,6 +149,12 @@ class User(Base):
     )
 
     poll_votes: Mapped[list["PollVote"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+    game_records: Mapped[list["GameRecord"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="selectin",

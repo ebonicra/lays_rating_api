@@ -20,6 +20,7 @@ from app.models import (
     user_role,
     user,
     feedback,
+    game_record,
 )
 
 from app.routers import (
@@ -36,6 +37,7 @@ from app.routers import (
     user_follow,         # ← /follows/{id}, /follows/{id}/followers
     user,                # ← /users/me, /users/{id}, /users/avatars
     feedback,
+    game,
 )
 
 
@@ -54,6 +56,7 @@ def include_routers(app: FastAPI) -> None:
     app.include_router(admin.router)         # /admin/*
     app.include_router(feedback.user_router)
     app.include_router(feedback.admin_router)
+    app.include_router(game.router)
 
 
 
