@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Виртуальные окружения
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Локальная БД (в образ не нужна — монтируется volume)
+lays_rating.db
+data/
+
+# Загрузки: игнорируем всё, КРОМЕ chip_images
+uploads/*
+!uploads/chip_images/
+!uploads/chip_images/**
+
+# Документация
+*.md
+README*
+
+# Локальные .env
+.env

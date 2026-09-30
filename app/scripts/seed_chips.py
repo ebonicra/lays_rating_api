@@ -24,7 +24,7 @@ from app.models.news import News
 from app.models.news_type import NewsType
 
 
-SEED_FILE = Path(__file__).parent / "seed" / "chips.json"
+SEED_FILE = Path(__file__).parent.parent / "seed" / "chips.json"
 
 
 def load_seed(path: Path) -> list[dict]:

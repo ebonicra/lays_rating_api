@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, String, DateTime
+from sqlalchemy import Boolean, Integer, String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -73,6 +73,10 @@ class User(Base):
         Boolean,
         default=False,
         nullable=False,
+    )
+
+    best_game_score: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False,
     )
 
     # ===== СВЯЗИ =====

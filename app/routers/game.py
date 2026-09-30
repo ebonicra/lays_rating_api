@@ -14,10 +14,7 @@ from app.schemas.game_record import (
 )
 from app.schemas.user import UserBriefResponse
 
-router = APIRouter(
-    prefix="/game",
-    tags=["Game"],
-)
+router = APIRouter(prefix="/game", tags=["Game"])
 
 
 @router.post("/records", response_model=GameRecordResponse)
@@ -26,12 +23,19 @@ def save_score(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """ Сохранить результат игры """
+    """ Сохранить результат игры. Возвращает лучший счёт и флаг рекорда. """
+    previous_best = current_user.best_game_score or 0
+    is_new_record = data.score > previous_best
+
     record = GameRecord(
         user_id=current_user.id,
         score=data.score,
     )
     db.add(record)
+
+    if is_new_record:
+        current_user.best_game_score = data.score
+
     db.commit()
     db.refresh(record)
 
@@ -44,6 +48,8 @@ def save_score(
             avatar_url=current_user.avatar_url,
         ),
         score=record.score,
+        best_score=current_user.best_game_score,
+        is_new_record=is_new_record,
         created_at=record.created_at,
     )
 
@@ -54,57 +60,44 @@ def get_leaderboard(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """
-    Топ игроков по лучшему результату.
-    Одна строка на пользователя: его максимальный score.
-    """
-    # Подзапрос: user_id -> max(score), count(*)
-    subq = (
-        db.query(
-            GameRecord.user_id.label("user_id"),
-            func.max(GameRecord.score).label("best_score"),
-            func.count(GameRecord.id).label("games_played"),
-        )
-        .group_by(GameRecord.user_id)
-        .subquery()
-    )
-
+    """ Топ игроков по лучшему результату. """
     rows = (
-        db.query(
-            User,
-            subq.c.best_score,
-            subq.c.games_played,
-        )
-        .join(subq, subq.c.user_id == User.id)
-        .order_by(subq.c.best_score.desc())
+        db.query(User)
+        .filter(User.best_game_score > 0)
+        .order_by(User.best_game_score.desc())
         .limit(limit)
         .all()
     )
 
+    # games_played одним запросом
+    user_ids = [u.id for u in rows]
+    counts = {}
+    if user_ids:
+        for uid, cnt in (
+            db.query(GameRecord.user_id, func.count(GameRecord.id))
+            .filter(GameRecord.user_id.in_(user_ids))
+            .group_by(GameRecord.user_id)
+            .all()
+        ):
+            counts[uid] = cnt
+
     items = [
         GameLeaderboardItem(
             user=UserBriefResponse(
-                id=user.id,
-                username=user.username,
-                display_name=user.display_name,
-                avatar_url=user.avatar_url,
+                id=u.id,
+                username=u.username,
+                display_name=u.display_name,
+                avatar_url=u.avatar_url,
             ),
-            best_score=best_score,
-            games_played=games_played,
+            best_score=u.best_game_score,
+            games_played=counts.get(u.id, 0),
         )
-        for user, best_score, games_played in rows
+        for u in rows
     ]
-
-    # Мой лучший результат
-    my_best = (
-        db.query(func.max(GameRecord.score))
-        .filter(GameRecord.user_id == current_user.id)
-        .scalar()
-    )
 
     return GameLeaderboardResponse(
         items=items,
-        my_best=my_best,
+        my_best=current_user.best_game_score or 0,
     )
 
 
@@ -114,7 +107,7 @@ def get_my_records(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """ Последние результаты текущего пользователя """
+    """ Последние игры текущего пользователя. """
     records = (
         db.query(GameRecord)
         .filter(GameRecord.user_id == current_user.id)
@@ -123,6 +116,7 @@ def get_my_records(
         .all()
     )
 
+    best = current_user.best_game_score or 0
     return [
         GameRecordResponse(
             id=r.id,
@@ -133,6 +127,8 @@ def get_my_records(
                 avatar_url=current_user.avatar_url,
             ),
             score=r.score,
+            best_score=best,
+            is_new_record=False,
             created_at=r.created_at,
         )
         for r in records

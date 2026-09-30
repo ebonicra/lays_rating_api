@@ -5,13 +5,15 @@ from app.schemas.user import UserBriefResponse
 
 
 class GameRecordCreate(BaseModel):
-    score: int = Field(ge=0)
+    score: int = Field(ge=0, le=100000)
 
 
 class GameRecordResponse(BaseModel):
     id: int
     user: UserBriefResponse
     score: int
+    best_score: int
+    is_new_record: bool
     created_at: datetime
 
 

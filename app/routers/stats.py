@@ -25,7 +25,7 @@ def get_user_stats(
     db: Session = Depends(get_db),
 ):
     """ Общая статистика пользователя """
-    get_user_or_404(db, user_id)
+    user = get_user_or_404(db, user_id)
 
     ratings_count = db.query(func.count(ChipPreference.id)).filter(
         ChipPreference.user_id == user_id,
@@ -67,6 +67,7 @@ def get_user_stats(
         "average_rating": round(float(avg_rating), 1) if avg_rating else 0.0,
         "followers_count": followers_count,
         "following_count": following_count,
+        "best_game_score": user.best_game_score,
     }
 
 
@@ -246,6 +247,53 @@ def get_friends_average_rating(
     friends_data.sort(key=lambda x: x["average_rating"], reverse=True)
     return friends_data
 
+
+@router.get("/{user_id}/friends-game-records")
+def get_friends_game_records(
+    user_id: int,
+    db: Session = Depends(get_db),
+):
+    """ Рекорды в игре у друзей пользователя (кого он читает) """
+    get_user_or_404(db, user_id)
+
+    following_ids = (
+        db.query(UserFollow.following_id)
+        .filter(UserFollow.follower_id == user_id)
+        .all()
+    )
+    friend_ids = [fid[0] for fid in following_ids]
+
+    if not friend_ids:
+        return []
+
+    friends = (
+        db.query(User)
+        .filter(User.id.in_(friend_ids))
+        .all()
+    )
+
+    result = [
+        {
+            "id": f.id,
+            "username": f.username,
+            "display_name": f.display_name,
+            "avatar_url": f.avatar_url,
+            "best_game_score": f.best_game_score,  # int | None
+        }
+        for f in friends
+    ]
+
+    # Сортируем: у кого есть рекорд — сверху, по убыванию.
+    # Те, кто не играл (None), — в конце, по алфавиту.
+    result.sort(
+        key=lambda x: (
+            x["best_game_score"] is None,   # False (0) идёт первым
+            -(x["best_game_score"] or 0),   # по убыванию рекорда
+            x["username"].lower(),          # по алфавиту для тех, у кого нет
+        )
+    )
+
+    return result
 
 # ЧИПСЫ, КОТОРЫЕ КОММЕНТИРОВАЛ
 

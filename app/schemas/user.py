@@ -32,6 +32,7 @@ class UserResponse(BaseModel):
     role: UserRole  # ← enum
     avatar_url: str | None = None
     created_at: datetime
+    best_game_score: int = 0
 
     class Config:
         from_attributes = True

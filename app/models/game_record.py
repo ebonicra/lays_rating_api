@@ -36,8 +36,6 @@ class GameRecord(Base):
     )
 
     __table_args__ = (
-        # Для выборки «лучший результат пользователя»
         Index("ix_game_records_user_score", "user_id", "score"),
-        # Для общего топа
         Index("ix_game_records_score_created", "score", "created_at"),
     )

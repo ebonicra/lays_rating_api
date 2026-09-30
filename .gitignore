@@ -3,7 +3,17 @@ venv/
 env/
 ENV/
 .venv/
-uploads/
+
+# Игнорируем всё, кроме chip_images
+uploads/*
+!uploads/chip_images/
+!uploads/chip_images/**
+
+# Явно игнорируем пользовательские папки (на случай, если внутри что-то есть)
+uploads/avatars/
+uploads/user_photos/
+uploads/news_images/
+uploads/feedback_images/
 
 # Python cache
 __pycache__/

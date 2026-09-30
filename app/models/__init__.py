@@ -13,6 +13,7 @@ from app.models.news_type import NewsType
 from app.models.poll_vote import PollVote
 from app.models.news_reaction import NewsReaction
 from app.models.feedback import Feedback
+from app.models.game_record import GameRecord
 
 __all__ = [
     "User",

@@ -34,7 +34,7 @@ class Settings:
     # JWT
     SECRET_KEY: str = os.getenv("SECRET_KEY", "change-me-in-production")
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # неделя
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7 * 30
 
     DEFAULT_CATEGORIES: list[str] = ["classic", "stix", "maxx", "stax", "baked", "ridged"]
 
@@ -49,5 +49,6 @@ for directory in [
     settings.CHIP_IMAGES_DIR,
     settings.NEWS_IMAGES_DIR,
     settings.USER_PHOTOS_DIR,
+    settings.FEEDBACK_IMAGES_DIR,
 ]:
     directory.mkdir(parents=True, exist_ok=True)
